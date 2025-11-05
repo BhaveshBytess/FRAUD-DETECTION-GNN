@@ -42,48 +42,61 @@
 
 ---
 
-## **M2 — Data Loader & Temporal Splits** [~]
+## **M2 — Data Loader & Temporal Splits** ✅
 
 **Goal:** Implement `src/data/elliptic_loader.py` to load Elliptic++, create temporal splits, and save `splits.json`.
 
-**Status:** NEXT - Ready to begin
+**Status:** COMPLETE (2025-11-05)
 
 ### Steps:
-- [ ] Implement `elliptic_loader.py`:
-  - [ ] Read `txs_features.csv` + `txs_classes.csv` + `txs_edgelist.csv`
-  - [ ] Merge node features and labels
-  - [ ] Build `tx_id` → contiguous index mapping
-  - [ ] Filter edges to valid nodes only
-  - [ ] Create temporal splits (train/val/test) based on timestamp
-  - [ ] Filter edges per split (both endpoints must be in same split)
-  - [ ] Create PyG `Data` objects with masks
-  - [ ] Save `data/elliptic/splits.json`
-- [ ] Add `--check` CLI flag to print stats
-- [ ] Implement `src/data/splits.py` helper functions
-- [ ] Write unit tests in `tests/test_loader.py`
-- [ ] Test: `python -m src.data.elliptic_loader --check` works
+- [x] Implement `elliptic_loader.py`:
+  - [x] Read `txs_features.csv` + `txs_classes.csv` + `txs_edgelist.csv`
+  - [x] Merge node features and labels
+  - [x] Build `tx_id` → contiguous index mapping
+  - [x] Filter edges to valid nodes only
+  - [x] Create temporal splits (train/val/test) based on timestamp
+  - [x] Filter edges per split (both endpoints must be in same split)
+  - [x] Create PyG `Data` objects with masks
+  - [x] Save `data/elliptic/splits.json`
+- [x] Add `--check` CLI flag to print stats
+- [x] Implement `src/data/splits.py` helper functions
+- [x] Write unit tests in `tests/test_loader.py`
+- [x] Test: `python -m src.data.elliptic_loader --check` works
 
 ### Done Criteria:
 - [x] `python -m src.data.elliptic_loader --check` prints:
-  - Node/edge counts
-  - Labeled node counts per split
-  - Class balance (fraud/legit)
-  - Time range per split
-- [x] `splits.json` saved with proper structure
-- [x] Unit tests pass (no future edges in train/val)
-- [x] Verification checklist complete
+  - Node/edge counts ✅ (203,769 nodes, 234,355 edges)
+  - Labeled node counts per split ✅ (Train: 26,381, Val: 8,999, Test: 11,184)
+  - Class balance (fraud/legit) ✅ (~10-11% fraud in train/val, ~6% in test)
+  - Time range per split ✅ (Train ≤29, Val ≤39, Test >39)
+- [x] `splits.json` saved with proper structure ✅
+- [x] Unit tests pass (no future edges in train/val) ✅ (12/12 tests passed)
+- [x] Verification checklist complete ✅
 
 ### Artifacts:
-- `src/data/elliptic_loader.py`
-- `src/data/splits.py`
-- `data/elliptic/splits.json`
-- `tests/test_loader.py`
+- ✅ `src/data/elliptic_loader.py` (EllipticDataset class with CLI)
+- ✅ `src/data/splits.py` (temporal split utilities)
+- ✅ `data/elliptic/splits.json` (split boundaries and statistics)
+- ✅ `tests/test_loader.py` (12 unit tests, all passing)
+
+### Key Statistics:
+- **Total nodes:** 203,769 (46,564 labeled, 157,205 unlabeled)
+- **Total edges:** 234,355
+- **Features:** 182 per node
+- **Train:** 26,381 nodes (2,871 fraud, 23,510 legit) - 10.88% fraud
+- **Val:** 8,999 nodes (1,038 fraud, 7,961 legit) - 11.53% fraud
+- **Test:** 11,184 nodes (636 fraud, 10,548 legit) - 5.69% fraud
+- **Temporal boundaries:** Train ≤29, Val ≤39, Test >39
+
+**Status:** COMPLETE (2025-11-05)
 
 ---
 
-## **M3 — GCN Baseline Notebook**
+## **M3 — GCN Baseline Notebook** [~]
 
 **Goal:** Implement and train GCN model in a fully reproducible notebook.
+
+**Status:** NEXT - Ready to begin
 
 ### Steps:
 - [ ] Create `src/models/gcn.py` with GCN class
