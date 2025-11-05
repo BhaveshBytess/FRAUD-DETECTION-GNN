@@ -83,22 +83,22 @@ class EllipticDataset:
         
         # Load features
         if verbose:
-            print(f"\n📊 Loading features from {self.features_path.name}...")
+            print(f"\n[*] Loading features from {self.features_path.name}...")
         features_df = pd.read_csv(self.features_path)
         
         # Load classes
         if verbose:
-            print(f"📊 Loading classes from {self.classes_path.name}...")
+            print(f"[*] Loading classes from {self.classes_path.name}...")
         classes_df = pd.read_csv(self.classes_path)
         
         # Load edges
         if verbose:
-            print(f"📊 Loading edges from {self.edges_path.name}...")
+            print(f"[*] Loading edges from {self.edges_path.name}...")
         edges_df = pd.read_csv(self.edges_path)
         
         # Merge features and classes
         if verbose:
-            print(f"\n🔗 Merging features and labels...")
+            print(f"\n[*] Merging features and labels...")
         data_df = features_df.merge(classes_df, on='txId', how='left')
         
         # Fill unlabeled as class 3 (will be filtered later)
@@ -119,6 +119,9 @@ class EllipticDataset:
                        if col not in ['txId', 'Time step', 'class']]
         x = torch.FloatTensor(data_df[feature_cols].values)
         
+        # Normalize features (important for GNN stability)
+        x = (x - x.mean(dim=0)) / (x.std(dim=0) + 1e-8)
+        
         # Extract timestamps
         timestamps = data_df['Time step'].values
         
@@ -129,7 +132,7 @@ class EllipticDataset:
         
         # Build edge index
         if verbose:
-            print(f"\n🔗 Building edge index...")
+            print(f"\n[*] Building edge index...")
         
         # Filter edges to known nodes
         valid_edges = edges_df[
@@ -146,7 +149,7 @@ class EllipticDataset:
         
         # Create temporal splits
         if verbose:
-            print(f"\n⏱️  Creating temporal splits...")
+            print(f"\n[*] Creating temporal splits...")
         
         splits = create_temporal_splits(
             timestamps, 
@@ -163,8 +166,8 @@ class EllipticDataset:
         test_mask = torch.BoolTensor(splits['test'] & labeled_mask.numpy())
         
         if verbose:
-            print(f"   Train: {train_mask.sum():,} labeled nodes (time ≤ {splits['train_time_end']})")
-            print(f"   Val:   {val_mask.sum():,} labeled nodes (time ≤ {splits['val_time_end']})")
+            print(f"   Train: {train_mask.sum():,} labeled nodes (time <= {splits['train_time_end']})")
+            print(f"   Val:   {val_mask.sum():,} labeled nodes (time <= {splits['val_time_end']})")
             print(f"   Test:  {test_mask.sum():,} labeled nodes")
             
             # Class balance per split
@@ -209,7 +212,7 @@ class EllipticDataset:
         self._save_splits()
         
         if verbose:
-            print(f"\n✅ Dataset loaded successfully!")
+            print(f"\n[OK] Dataset loaded successfully!")
             print(f"   Features: {x.shape[1]}")
             print(f"   Nodes: {len(x):,}")
             print(f"   Edges: {edge_index.shape[1]:,}")
@@ -252,7 +255,7 @@ def main():
             data = dataset.load(verbose=True)
             
             # Additional validation
-            print("\n🔍 Running validation checks...")
+            print(f"\n[!] Running validation checks...")
             
             # Check for data leakage (edges crossing time boundaries)
             edge_index_np = data.edge_index.numpy()
@@ -276,11 +279,11 @@ def main():
             validate_no_future_leakage(val_edges, timestamps_np, "Val")
             validate_no_future_leakage(test_edges, timestamps_np, "Test")
             
-            print(f"\n✅ All validation checks passed!")
-            print(f"📁 Splits saved to: {dataset.splits_path}")
+            print(f"\n[OK] All validation checks passed!")
+            print(f"[*] Splits saved to: {dataset.splits_path}")
             
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\n[ERROR] Error: {e}")
             raise
     else:
         parser.print_help()

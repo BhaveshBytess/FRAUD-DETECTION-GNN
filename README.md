@@ -156,8 +156,8 @@ This project uses the **Elliptic++** dataset. Please cite the original paper:
 
 ## 🎯 Project Status
 
-- [x] M1: Repository scaffold
-- [ ] M2: Data loader & temporal splits
+- [x] M1: Repository scaffold ✅
+- [x] M2: Data loader & temporal splits ✅
 - [ ] M3: GCN baseline notebook
 - [ ] M4: GraphSAGE & GAT notebooks
 - [ ] M5: Tabular baselines

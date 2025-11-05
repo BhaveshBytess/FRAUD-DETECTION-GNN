@@ -91,7 +91,7 @@ def validate_no_future_leakage(
     future_leaks = (dst_times < src_times).sum()
     
     if future_leaks > 0:
-        print(f"⚠️  WARNING: {split_name} has {future_leaks} edges pointing to past!")
+        print(f"[!] WARNING: {split_name} has {future_leaks} edges pointing to past!")
         return False
     
     return True

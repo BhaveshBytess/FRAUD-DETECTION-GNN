@@ -1,4 +1,5 @@
 """Graph Convolutional Network (GCN) for fraud detection."""
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -137,6 +138,11 @@ class GCNTrainer:
         # Forward pass
         out = self.model(self.data.x, self.data.edge_index)
         
+        # Check for NaN
+        if torch.isnan(out).any():
+            print("[!] WARNING: NaN detected in forward pass")
+            return float('inf')
+        
         # Compute loss only on training nodes
         loss = self.criterion(
             out[self.data.train_mask],
@@ -145,6 +151,10 @@ class GCNTrainer:
         
         # Backward pass
         loss.backward()
+        
+        # Clip gradients
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+        
         self.optimizer.step()
         
         return loss.item()
@@ -215,6 +225,11 @@ class GCNTrainer:
             val_labels = self.data.y[self.data.val_mask].cpu().numpy()
             val_probs_np = val_probs[:, 1].cpu().numpy()
             
+            # Check for NaN in predictions
+            if np.isnan(val_probs_np).any():
+                print(f"[!] WARNING: NaN in predictions at epoch {epoch+1}, skipping")
+                continue
+            
             if eval_metric == 'pr_auc':
                 val_metric = average_precision_score(val_labels, val_probs_np)
             else:
@@ -246,7 +261,7 @@ class GCNTrainer:
             
             if self.patience_counter >= patience:
                 if verbose:
-                    print(f"\n⏹️  Early stopping at epoch {epoch+1}")
+                    print(f"\n[*] Early stopping at epoch {epoch+1}")
                     print(f"   Best {eval_metric.upper()}: {self.best_val_metric:.4f} at epoch {self.best_epoch+1}")
                 break
         
