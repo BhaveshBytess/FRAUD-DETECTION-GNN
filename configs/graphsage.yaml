@@ -1,0 +1,36 @@
+experiment: "elliptic-gnn-baselines"
+seed: 42
+device: "cuda"
+
+data:
+  root: "data/elliptic"
+  nodes_features: "txs_features.csv"
+  nodes_classes: "txs_classes.csv"
+  edges: "txs_edgelist.csv"
+  cache_processed: true
+
+splits:
+  train_frac: 0.6
+  val_frac: 0.2
+  test_frac: 0.2
+
+model:
+  name: "graphsage"
+  in_channels: 166
+  hidden_channels: 128
+  num_layers: 2
+  dropout: 0.4
+
+train:
+  epochs: 100
+  batch_size: null
+  lr: 0.001
+  weight_decay: 0.0005
+  early_stopping_patience: 15
+
+eval:
+  recall_k_fracs: [0.005, 0.01, 0.02]
+  save_plots: true
+
+logging:
+  out_dir: "reports"

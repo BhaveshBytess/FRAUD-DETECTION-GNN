@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# PyTorch
+*.pt
+*.pth
+*.ckpt
+checkpoints/*
+!checkpoints/.gitkeep
+
+# Data (keep structure, ignore files)
+data/elliptic/*.csv
+data/elliptic/*.json
+!data/elliptic/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Reports (keep structure)
+reports/*.json
+reports/*.csv
+reports/plots/*.png
+reports/plots/*.jpg
+!reports/.gitkeep
+!reports/plots/.gitkeep
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Logs
+*.log

@@ -1,0 +1,38 @@
+experiment: "elliptic-gnn-baselines"
+seed: 42
+device: "cuda"  # or "cpu"
+
+data:
+  root: "data/elliptic"
+  nodes_features: "txs_features.csv"
+  nodes_classes: "txs_classes.csv"
+  edges: "txs_edgelist.csv"
+  cache_processed: true
+
+splits:
+  # Temporal split boundaries (will be determined from data)
+  train_frac: 0.6
+  val_frac: 0.2
+  test_frac: 0.2
+
+model:
+  name: "gcn"
+  in_channels: 166  # Will be auto-detected from data
+  hidden_channels: 128
+  num_layers: 2
+  dropout: 0.4
+  gat_heads: 4
+
+train:
+  epochs: 100
+  batch_size: null  # null = full batch
+  lr: 0.001
+  weight_decay: 0.0005
+  early_stopping_patience: 15
+
+eval:
+  recall_k_fracs: [0.005, 0.01, 0.02]
+  save_plots: true
+
+logging:
+  out_dir: "reports"
