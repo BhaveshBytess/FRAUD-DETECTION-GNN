@@ -96,22 +96,46 @@
 
 **Goal:** Implement and train GCN model in a fully reproducible notebook.
 
-**Status:** NEXT - Ready to begin
+**Status:** IN PROGRESS - Model implemented, training script has Unicode issues on Windows
 
 ### Steps:
-- [ ] Create `src/models/gcn.py` with GCN class
-- [ ] Create `notebooks/03_gcn_baseline.ipynb`:
-  - [ ] Load data using elliptic_loader
-  - [ ] Set seeds + deterministic flags
-  - [ ] Initialize GCN model
-  - [ ] Train with early stopping on val PR-AUC
-  - [ ] Evaluate on test set
-  - [ ] Calculate metrics (PR-AUC, ROC-AUC, F1, Recall@K)
-  - [ ] Generate PR/ROC curve plots
-  - [ ] Save checkpoint, metrics.json, plots
-  - [ ] Append to metrics_summary.csv
-- [ ] Run notebook end-to-end
-- [ ] Verify all artifacts created
+- [x] Create `src/models/gcn.py` with GCN class
+- [x] Create `notebooks/03_gcn_baseline.ipynb`
+- [~] Train model and generate results (Unicode encoding issue on Windows CMD)
+- [ ] Evaluate on test set
+- [ ] Calculate metrics (PR-AUC, ROC-AUC, F1, Recall@K)
+- [ ] Generate PR/ROC curve plots
+- [ ] Save checkpoint, metrics.json, plots
+- [ ] Append to metrics_summary.csv
+
+### Done Criteria:
+- [x] GCN model class implemented with 2-layer architecture
+- [x] GCNTrainer class with early stopping
+- [x] Jupyter notebook created with full workflow
+- [x] Training script created (scripts/train_gcn.py)
+- [x] Model unit tests passing (8/8 tests)
+- [ ] Notebook runs fully without errors
+- [ ] Metrics saved to `reports/metrics.json`
+- [ ] Plots saved to `reports/plots/`
+- [ ] Row appended to `reports/metrics_summary.csv`
+- [ ] Checkpoint saved to `checkpoints/gcn_best.pt`
+
+### Artifacts Created:
+- ✅ `src/models/gcn.py` (GCN model + GCNTrainer)
+- ✅ `notebooks/03_gcn_baseline.ipynb` (full training notebook)
+- ✅ `scripts/train_gcn.py` (training script)
+- ✅ `tests/test_models_shapes.py` (8 unit tests, all passing)
+- [ ] Training results (pending Unicode fix)
+
+### Technical Notes:
+- Model: 2-layer GCN with 128 hidden channels, 0.4 dropout
+- Parameters: ~23,682 trainable parameters
+- Early stopping on validation PR-AUC with patience=15
+- Optimizer: Adam (lr=0.001, weight_decay=0.0005)
+- **Issue:** Unicode emojis in print statements cause encoding errors on Windows CMD
+- **Solution:** Use Jupyter notebook or fix encoding in data loader
+
+**Status:** Model code complete, awaiting execution
 
 ### Done Criteria:
 - [x] Notebook runs fully without errors

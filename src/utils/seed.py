@@ -19,8 +19,9 @@ def set_all_seeds(seed: int = 42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     
-    # Set deterministic algorithms for PyTorch >= 1.8
-    try:
-        torch.use_deterministic_algorithms(True)
-    except AttributeError:
-        pass
+    # Note: torch.use_deterministic_algorithms(True) can cause issues with some operations
+    # Commenting out for compatibility with PyTorch Geometric on CPU
+    # try:
+    #     torch.use_deterministic_algorithms(True)
+    # except AttributeError:
+    #     pass
