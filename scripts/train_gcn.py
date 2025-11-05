@@ -35,13 +35,13 @@ data = dataset.load(verbose=True)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"\n[*] Using device: {device}")
 
-# Model configuration
+# Model configuration (smaller for CPU stability)
 config = {
     'in_channels': data.x.shape[1],
-    'hidden_channels': 128,
+    'hidden_channels': 64,  # Reduced from 128
     'out_channels': 2,
     'num_layers': 2,
-    'dropout': 0.4
+    'dropout': 0.3  # Reduced from 0.4
 }
 
 # Initialize model
@@ -54,15 +54,15 @@ trainer = GCNTrainer(
     model=model,
     data=data,
     device=device,
-    lr=0.001,
-    weight_decay=0.0005
+    lr=0.01,  # Increased learning rate
+    weight_decay=0.0001  # Reduced weight decay
 )
 
 # Train
 print("\n" + "=" * 60)
 print("Training GCN Model")
 print("=" * 60)
-history = trainer.fit(epochs=100, patience=15, eval_metric='pr_auc', verbose=True)
+history = trainer.fit(epochs=50, patience=10, eval_metric='pr_auc', verbose=True)
 
 print(f"\n[OK] Training complete!")
 print(f"   Best validation PR-AUC: {trainer.best_val_metric:.4f}")

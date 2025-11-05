@@ -56,6 +56,17 @@ class GCN(nn.Module):
         else:
             # Single layer case
             self.convs[0] = GCNConv(in_channels, out_channels)
+        
+        # Initialize weights
+        self.reset_parameters()
+    
+    def reset_parameters(self):
+        """Reset all learnable parameters with Xavier initialization."""
+        for conv in self.convs:
+            conv.reset_parameters()
+            # Additional Xavier init for stability
+            if hasattr(conv, 'lin'):
+                nn.init.xavier_uniform_(conv.lin.weight, gain=0.5)
     
     def forward(self, x, edge_index):
         """
@@ -68,6 +79,9 @@ class GCN(nn.Module):
         Returns:
             Logits [N, out_channels]
         """
+        # Add small noise for numerical stability
+        x = x + torch.randn_like(x) * 1e-5
+        
         for i, conv in enumerate(self.convs[:-1]):
             x = conv(x, edge_index)
             x = F.relu(x)
@@ -77,11 +91,7 @@ class GCN(nn.Module):
         x = self.convs[-1](x, edge_index)
         
         return x
-    
-    def reset_parameters(self):
-        """Reset all learnable parameters."""
-        for conv in self.convs:
-            conv.reset_parameters()
+
 
 
 class GCNTrainer:
