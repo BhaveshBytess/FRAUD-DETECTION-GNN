@@ -100,10 +100,20 @@ class EllipticDataset:
         if verbose:
             print(f"\n[*] Merging features and labels...")
         data_df = features_df.merge(classes_df, on='txId', how='left')
-        
+
+        # Normalize timestamp column name to 'timestamp'
+        ts_candidates = ['Time step','time_step','timestamp','time','timestep']
+        for c in ts_candidates:
+            if c in data_df.columns:
+                if c != 'timestamp':
+                    data_df.rename(columns={c: 'timestamp'}, inplace=True)
+                break
+        else:
+            raise KeyError(f"No timestamp column found. Expected one of {ts_candidates}. Columns: {list(data_df.columns)[:25]}")
+
         # Fill unlabeled as class 3 (will be filtered later)
         data_df['class'] = data_df['class'].fillna(3).astype(int)
-        
+
         if verbose:
             print(f"   Total transactions: {len(data_df):,}")
             print(f"   Fraud (class=1): {(data_df['class'] == 1).sum():,}")
@@ -114,16 +124,16 @@ class EllipticDataset:
         tx_ids = data_df['txId'].values
         tx_id_to_idx = {tx_id: idx for idx, tx_id in enumerate(tx_ids)}
         
-        # Extract features (exclude txId, Time step, class)
+        # Extract features (exclude identifier, timestamp, class)
         feature_cols = [col for col in data_df.columns 
-                       if col not in ['txId', 'Time step', 'class']]
+                       if col not in ['txId', 'timestamp', 'class']]
         x = torch.FloatTensor(data_df[feature_cols].values)
         
         # Normalize features (important for GNN stability)
         x = (x - x.mean(dim=0)) / (x.std(dim=0) + 1e-8)
         
-        # Extract timestamps
-        timestamps = data_df['Time step'].values
+        # Extract unified timestamps
+        timestamps = data_df['timestamp'].values
         
         # Convert classes: 1=fraud (1), 2=legit (0), 3=unlabeled (-1)
         y_raw = data_df['class'].values
