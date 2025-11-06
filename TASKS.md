@@ -188,36 +188,65 @@
 
 ---
 
-## **M4 — GraphSAGE & GAT Notebooks**
+## **M4 — GraphSAGE & GAT Notebooks** [~]
 
 **Goal:** Implement GraphSAGE and GAT models and compare performance.
 
-### Steps:
-- [ ] Create `src/models/graphsage.py`
-- [ ] Create `src/models/gat.py`
-- [ ] Create `notebooks/04_graphsage_gat.ipynb`:
-  - [ ] Train GraphSAGE model
-  - [ ] Train GAT model
-  - [ ] Compare metrics across all GNN models
-  - [ ] Generate comparison plots
-  - [ ] Save artifacts for both models
-  - [ ] Append metrics to summary CSV
-- [ ] Run notebook end-to-end
-- [ ] Verify all artifacts created
+**Status:** 🔄 IN PROGRESS - Models implemented, ready for Kaggle training
 
-### Done Criteria:
-- [x] Both models train successfully
-- [x] Metrics logged for GraphSAGE and GAT
-- [x] Comparison table/plot generated
-- [x] All artifacts saved correctly
-- [x] Verification checklist complete
+### Completed Tasks
+- [x] Create `src/models/graphsage.py` (340 lines)
+- [x] Create `src/models/gat.py` (370 lines)  
+- [x] Create `notebooks/04_graphsage_gat_kaggle.ipynb`
+- [x] Implement GraphSAGETrainer with early stopping
+- [x] Implement GATTrainer with early stopping
+- [x] Add NaN detection and handling
+- [x] Configure hyperparameters
+- [x] Push to GitHub
+- [ ] Train on Kaggle GPU (~25-30 mins)
+- [ ] Download results
+- [ ] Compare with GCN baseline
+- [ ] Generate comparison plots
+- [ ] Save artifacts
 
-### Artifacts:
-- `src/models/graphsage.py`
-- `src/models/gat.py`
-- `notebooks/04_graphsage_gat.ipynb`
-- `checkpoints/graphsage_best.pt`
-- `checkpoints/gat_best.pt`
+### Models Implemented
+
+**GraphSAGE:**
+- Neighborhood aggregation (mean)
+- 2-layer architecture (182 → 128 → 2)
+- Parameters: ~24K
+- Expected improvement: Less overfitting than GCN
+
+**GAT:**
+- Multi-head attention (4 heads)
+- 2-layer architecture (182 → 64×4 → 2)
+- Parameters: ~48K
+- Expected improvement: Best overall performance
+
+### Next Steps
+1. Upload notebook to Kaggle
+2. Enable GPU T4 x2
+3. Link elliptic-fraud-detection dataset
+4. Run training (both models)
+5. Download 4 files:
+   - `graphsage_metrics.json`
+   - `gat_metrics.json`
+   - `graphsage_best.pt`
+   - `gat_best.pt`
+
+### Files Created
+- ✅ `src/models/graphsage.py`
+- ✅ `src/models/gat.py`
+- ✅ `notebooks/04_graphsage_gat_kaggle.ipynb`
+- ✅ `docs/M4_INSTRUCTIONS.md`
+- ⏳ `reports/graphsage_metrics.json` (pending training)
+- ⏳ `reports/gat_metrics.json` (pending training)
+- ⏳ `checkpoints/graphsage_best.pt` (pending training)
+- ⏳ `checkpoints/gat_best.pt` (pending training)
+
+**Status:** M4 at 50% (implementation done, training pending)
+
+---
 - Updated `reports/metrics_summary.csv`
 - Comparison plots
 
