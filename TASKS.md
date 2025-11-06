@@ -262,22 +262,64 @@
 
 ---
 
-## **M5 — Tabular Baselines**
+## **M5 — Tabular Baselines** [~]
 
-**Goal:** Implement non-graph baselines (Logistic Regression, Random Forest, XGBoost, MLP).
+**Goal:** Train traditional ML models (no graph) to answer: "Does graph structure help?"
 
-### Steps:
-- [ ] Create `notebooks/00_baselines_tabular.ipynb`:
-  - [ ] Load node features only (no graph structure)
-  - [ ] Train Logistic Regression with class weights
-  - [ ] Train Random Forest
-  - [ ] Train XGBoost
-  - [ ] Train MLP (2-3 layers)
-  - [ ] Evaluate all models with same metrics
-  - [ ] Compare against GNN baselines
-  - [ ] Append all metrics to summary CSV
-- [ ] Run notebook end-to-end
-- [ ] Verify metrics logged
+**Status:** 🔄 IN PROGRESS - Notebook ready, training pending
+
+### The Big Question
+**Does the graph actually add value, or are features alone sufficient?**
+
+### Models to Train (Features Only, No Graph)
+1. **Logistic Regression** - Linear baseline (~1 min)
+2. **Random Forest** - Tree ensemble (~3-4 mins)
+3. **XGBoost** - Gradient boosting (~8-10 mins) ⭐ Expected best ML
+4. **MLP** - Neural network without graph (~3-4 mins)
+
+### Expected Outcomes
+
+**Scenario A: Graph is Essential**
+- XGBoost PR-AUC: 0.25-0.30
+- GraphSAGE PR-AUC: 0.45
+- → Graph adds 50%+ value! ✅
+
+**Scenario B: Graph Helps**
+- XGBoost PR-AUC: 0.35-0.42
+- GraphSAGE PR-AUC: 0.45
+- → Graph adds 10-20% value ✅
+
+**Scenario C: Features Sufficient**
+- XGBoost PR-AUC: 0.48+
+- GraphSAGE PR-AUC: 0.45
+- → Graph doesn't help! ⚠️
+
+### Completed Tasks
+- [x] Create `notebooks/05_tabular_baselines_kaggle.ipynb`
+- [x] Implement Logistic Regression with class weights
+- [x] Implement Random Forest with balanced classes
+- [x] Implement XGBoost with early stopping
+- [x] Implement MLP (3 hidden layers: 256, 128, 64)
+- [x] Same evaluation metrics as GNN models
+- [x] Comparison visualization (bar charts)
+- [x] Create M5_INSTRUCTIONS.md
+- [x] Push to GitHub
+- [ ] Train on Kaggle CPU (~15-20 mins)
+- [ ] Download results (6 files)
+- [ ] Analyze: Does graph help?
+- [ ] Document findings
+
+### Files Created
+- ✅ `notebooks/05_tabular_baselines_kaggle.ipynb`
+- ✅ `docs/M5_INSTRUCTIONS.md`
+- ⏳ `reports/logistic_regression_metrics.json`
+- ⏳ `reports/random_forest_metrics.json`
+- ⏳ `reports/xgboost_metrics.json`
+- ⏳ `reports/mlp_metrics.json`
+- ⏳ `reports/all_models_comparison.csv`
+- ⏳ `reports/plots/all_models_comparison.png`
+
+**Status:** M5 at 50% (implementation done, training pending)
 
 ### Done Criteria:
 - [x] All 4 tabular models trained and evaluated
