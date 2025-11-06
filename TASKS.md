@@ -92,62 +92,81 @@
 
 ---
 
-##  **M3 — GCN Baseline** [~]
+## **M3 — GCN Baseline** [x]
 
 **Goal:** Implement and train GCN model in a fully reproducible notebook.
 
-**Status:** BLOCKED - GCN produces NaN on CPU, requires GPU or alternative approach
+**Status:** ✅ COMPLETE - Trained on Kaggle GPU with full dataset
 
-### Completed:
+### Results Summary
+
+**Training Environment:**
+- Platform: Kaggle with GPU T4 x2
+- Dataset: Full Elliptic++ (203,769 nodes, 234,355 edges)
+- Training time: ~15 minutes
+- Best epoch: 100 (full run)
+
+**Test Set Performance:**
+- ✅ **ROC-AUC: 0.7627** (target: >0.80 - close!)
+- ⚠️ **PR-AUC: 0.1976** (target: >0.60 - needs improvement)
+- ⚠️ **F1 Score: 0.2487** (target: >0.30)
+- **Recall@1%: 0.0613** (6.1% fraud caught in top 1%)
+
+**Key Findings:**
+- ✅ Model trains successfully on GPU
+- ⚠️ Significant overfitting: Val PR-AUC (0.57) >> Test PR-AUC (0.20)
+- ⚠️ Temporal distribution shift: Test set harder (5.69% fraud vs 10.88% in train)
+- ⚠️ Low precision-recall performance suggests GCN struggles with severe imbalance
+
+### Completed Tasks
 - [x] GCN model class (2-layer architecture)
-- [x] GCNTrainer with early stopping  
+- [x] GCNTrainer with early stopping
 - [x] Jupyter notebook (full workflow)
-- [x] Training script  
+- [x] Kaggle notebook (GPU-ready)
+- [x] Training script
 - [x] 8 model unit tests (all passing)
-- [x] Feature normalization
-- [x] Gradient clipping
+- [x] Feature sanitization (inf/NaN handling)
+- [x] Manual self-loops for stability
 - [x] NaN detection and handling
-- [x] Xavier initialization
-- [x] Multiple optimization attempts
+- [x] **Trained on full dataset with GPU** ✅
+- [x] **Generated all results** ✅
 
-### Technical Issue:
-**Problem:** PyTorch Geometric GCNConv produces NaN immediately on CPU with large graph (203K nodes, 234K edges)
-
-**Root Cause:** 
-- CPU scatter operations in PyG not numerically stable for large graphs
-- Known limitation: PyG designed primarily for GPU
-- Full-batch training on 200K+ nodes pushes CPU limits
-
-**Attempted Solutions (all failed):**
-1. ✅ Feature normalization (z-score)
-2. ✅ Gradient clipping (max_norm=1.0)
-3. ✅ Reduced model size (64 hidden dims)
-4. ✅ Adjusted learning rate (0.01)
-5. ✅ Xavier initialization (gain=0.5)
-6. ✅ Added noise for stability
-7. ✅ Reduced dropout (0.3)
-
-**Alternative Approaches:**
-1. **Use GPU** - PyG works reliably on CUDA ⭐ (RECOMMENDED)
-2. **GraphSAGE with sampling** - More CPU-friendly with mini-batches
-3. **Start with MLP baselines** - Validate pipeline without graph
-4. **Use simpler GNN library** - DGL or manual implementation
-
-### Artifacts Created:
+### Artifacts Created
 - ✅ `src/models/gcn.py` (GCN + Trainer, 270 lines)
-- ✅ `notebooks/03_gcn_baseline.ipynb` (complete workflow)
+- ✅ `notebooks/03_gcn_baseline.ipynb` (local notebook)
+- ✅ `notebooks/03_gcn_baseline_kaggle.ipynb` (GPU-ready)
 - ✅ `scripts/train_gcn.py` (training script)
 - ✅ `tests/test_models_shapes.py` (8 tests passing)
-- ⚠️ Training results (blocked by hardware limitation)
+- ✅ `reports/gcn_metrics.json` (test metrics)
+- ✅ `reports/plots/gcn_training_history.png`
+- ✅ `reports/plots/gcn_pr_roc_curves.png`
+- ✅ `checkpoints/gcn_best.pt` (trained model)
+- ✅ `docs/KAGGLE_INSTRUCTIONS.md`
 
-### Recommendation:
-**Skip M3 temporarily, proceed to M5 (Tabular Baselines)** to:
-1. Validate the data pipeline works end-to-end
-2. Establish performance baselines
-3. Generate first results for metrics_summary.csv
-4. Then return to GNN models with GPU or GraphSAGE
+### Technical Challenges Overcome
+1. ✅ CPU NaN issues → Moved to GPU
+2. ✅ GPU NaN issues → Feature sanitization (inf/NaN handling)
+3. ✅ Isolated nodes → Manual self-loops
+4. ✅ Unicode encoding on Windows → ASCII replacements
+5. ✅ Large dataset files → Excluded from git
 
-**Status:** M3 at 95% (code complete, blocked by hardware constraint)
+### Lessons Learned
+- **PyTorch Geometric requires GPU** for large graphs (200K+ nodes)
+- **Feature sanitization is critical** - inf/NaN values break training
+- **Temporal graphs have distribution shift** - test is harder than validation
+- **Class imbalance worsens over time** - fraud % decreases in later periods
+- **GCN baseline established** - provides comparison point for future models
+
+### Next Improvements (M4+)
+1. **GraphSAGE with neighborhood sampling** - Better scalability
+2. **GAT with attention** - Learn edge importance
+3. **Class weighting/focal loss** - Handle severe imbalance
+4. **Feature engineering** - Temporal features, graph statistics
+5. **Ensemble with tabular models** - Combine strengths
+
+**Status:** M3 100% COMPLETE ✅
+
+---
 
 ### Done Criteria:
 - [x] Notebook runs fully without errors
