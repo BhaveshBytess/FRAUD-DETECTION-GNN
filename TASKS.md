@@ -188,11 +188,32 @@
 
 ---
 
-## **M4 — GraphSAGE & GAT Notebooks** [~]
+## **M4 — GraphSAGE & GAT Notebooks** [x]
 
 **Goal:** Implement GraphSAGE and GAT models and compare performance.
 
-**Status:** 🔄 IN PROGRESS - Models implemented, ready for Kaggle training
+**Status:** ✅ COMPLETE - Both models trained on Kaggle GPU with excellent results!
+
+### 🏆 **RESULTS SUMMARY**
+
+**GraphSAGE - BREAKTHROUGH! ⭐⭐⭐**
+- Test PR-AUC: **0.4483** (+127% vs GCN!) 🎉
+- Test ROC-AUC: **0.8210** (✅ Exceeds target!)
+- F1 Score: **0.4527** (✅ Exceeds target!)
+- Recall@1%: **0.1478** (141% improvement)
+- **BEST MODEL** - Production ready!
+
+**GAT - Underperforms ⚠️**
+- Test PR-AUC: 0.1839 (-6.9% vs GCN)
+- Test ROC-AUC: 0.7942
+- Recall@1%: 0.0126 (79% worse than GCN!)
+- Attention doesn't help on noisy fraud graphs
+
+### Why GraphSAGE Wins
+1. ✅ Neighborhood sampling → better generalization
+2. ✅ Robust to temporal distribution shift
+3. ✅ Simpler aggregation → less overfitting
+4. ✅ Right model capacity (24K params)
 
 ### Completed Tasks
 - [x] Create `src/models/graphsage.py` (340 lines)
@@ -203,48 +224,37 @@
 - [x] Add NaN detection and handling
 - [x] Configure hyperparameters
 - [x] Push to GitHub
-- [ ] Train on Kaggle GPU (~25-30 mins)
-- [ ] Download results
-- [ ] Compare with GCN baseline
-- [ ] Generate comparison plots
-- [ ] Save artifacts
+- [x] **Train on Kaggle GPU** ✅
+- [x] **Download results** ✅
+- [x] **Analyze and compare** ✅
+- [x] **Document findings** ✅
 
-### Models Implemented
+### Models Comparison
 
-**GraphSAGE:**
-- Neighborhood aggregation (mean)
-- 2-layer architecture (182 → 128 → 2)
-- Parameters: ~24K
-- Expected improvement: Less overfitting than GCN
+| Model | PR-AUC | ROC-AUC | F1 | Recall@1% | Status |
+|-------|--------|---------|----|-----------| -------|
+| GCN | 0.1976 | 0.7627 | 0.2487 | 0.0613 | Baseline |
+| **GraphSAGE** | **0.4483** | **0.8210** | **0.4527** | **0.1478** | 🏆 **WINNER** |
+| GAT | 0.1839 | 0.7942 | 0.2901 | 0.0126 | ⚠️ Poor |
 
-**GAT:**
-- Multi-head attention (4 heads)
-- 2-layer architecture (182 → 64×4 → 2)
-- Parameters: ~48K
-- Expected improvement: Best overall performance
-
-### Next Steps
-1. Upload notebook to Kaggle
-2. Enable GPU T4 x2
-3. Link elliptic-fraud-detection dataset
-4. Run training (both models)
-5. Download 4 files:
-   - `graphsage_metrics.json`
-   - `gat_metrics.json`
-   - `graphsage_best.pt`
-   - `gat_best.pt`
+### Key Insights
+- **GraphSAGE achieves 2.27x better PR-AUC** than GCN
+- Simpler models outperform complex attention on fraud data
+- Temporal graphs need sampling-based approaches
+- GAT overfits with 2x more parameters
 
 ### Files Created
 - ✅ `src/models/graphsage.py`
 - ✅ `src/models/gat.py`
 - ✅ `notebooks/04_graphsage_gat_kaggle.ipynb`
 - ✅ `docs/M4_INSTRUCTIONS.md`
-- ⏳ `reports/graphsage_metrics.json` (pending training)
-- ⏳ `reports/gat_metrics.json` (pending training)
-- ⏳ `checkpoints/graphsage_best.pt` (pending training)
-- ⏳ `checkpoints/gat_best.pt` (pending training)
+- ✅ `reports/graphsage_metrics.json`
+- ✅ `reports/gat_metrics.json`
+- ✅ `reports/M4_RESULTS_SUMMARY.md`
+- ✅ `checkpoints/graphsage_best.pt` ⭐ RECOMMENDED
+- ✅ `checkpoints/gat_best.pt`
 
-**Status:** M4 at 50% (implementation done, training pending)
+**Status:** M4 100% COMPLETE ✅
 
 ---
 - Updated `reports/metrics_summary.csv`
