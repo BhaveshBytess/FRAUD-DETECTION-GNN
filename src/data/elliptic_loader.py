@@ -2,7 +2,7 @@
 Elliptic++ Dataset Loader
 
 Loads Bitcoin transaction graph with temporal splits.
-Classes: 1=fraud, 2=legitimate, 3=unlabeled
+Classes: 1=licit (legitimate), 2=illicit (fraud), 3=unknown (unlabeled)
 """
 import os
 import json
@@ -115,10 +115,23 @@ class EllipticDataset:
         data_df['class'] = data_df['class'].fillna(3).astype(int)
 
         if verbose:
+            total_labeled = (data_df['class'].isin([1,2])).sum()
+            licit_cnt = (data_df['class'] == 1).sum()
+            illicit_cnt = (data_df['class'] == 2).sum()
             print(f"   Total transactions: {len(data_df):,}")
-            print(f"   Fraud (class=1): {(data_df['class'] == 1).sum():,}")
-            print(f"   Legitimate (class=2): {(data_df['class'] == 2).sum():,}")
-            print(f"   Unlabeled (class=3): {(data_df['class'] == 3).sum():,}")
+            print(f"   Class=1 count: {licit_cnt:,}")
+            print(f"   Class=2 count: {illicit_cnt:,}")
+            print(f"   Unknown (class=3): {(data_df['class'] == 3).sum():,}")
+            if total_labeled > 0:
+                pct1 = 100*licit_cnt/total_labeled
+                pct2 = 100*illicit_cnt/total_labeled
+                # Choose minority label as fraud to avoid flipped label issues
+                if pct2 < pct1:
+                    self._fraud_label = 2  # standard mapping
+                else:
+                    self._fraud_label = 1  # flipped mapping detected
+                print(f"   -> Labeled distribution: class1={pct1:.2f}%, class2={pct2:.2f}%")
+                print(f"   -> Treating class {self._fraud_label} as FRAUD (positive label)")
         
         # Create tx_id to index mapping
         tx_ids = data_df['txId'].values
@@ -135,9 +148,13 @@ class EllipticDataset:
         # Extract unified timestamps
         timestamps = data_df['timestamp'].values
         
-        # Convert classes: 1=fraud (1), 2=legit (0), 3=unlabeled (-1)
+        # Convert classes to binary with potential flip correction:
+        # Normal (expected): 2=illicit/fraud -> 1, 1=licit -> 0, 3=unlabeled -> -1
+        # If labels flipped (detected by majority illicit), invert mapping.
         y_raw = data_df['class'].values
-        y = np.where(y_raw == 1, 1, np.where(y_raw == 2, 0, -1))
+        fraud_label = getattr(self, '_fraud_label', 2)
+        legit_label = 1 if fraud_label == 2 else 2
+        y = np.where(y_raw == fraud_label, 1, np.where(y_raw == legit_label, 0, -1))
         y = torch.LongTensor(y)
         
         # Build edge index
