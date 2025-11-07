@@ -2,7 +2,8 @@
 Elliptic++ Dataset Loader
 
 Loads Bitcoin transaction graph with temporal splits.
-Classes: 1=licit (legitimate), 2=illicit (fraud), 3=unknown (unlabeled)
+Classes: 1=illicit (fraud), 2=licit (legitimate), 3=unknown (unlabeled)
+Encoding: Class 1 is fraud (~9.76% of labeled), Class 2 is legit (~90.24%)
 """
 import os
 import json
@@ -23,7 +24,7 @@ class EllipticDataset:
     
     def __init__(
         self,
-        root: str = "data/elliptic",
+        root: str = "data/Elliptic++ Dataset",
         train_frac: float = 0.6,
         val_frac: float = 0.2,
         test_frac: float = 0.2
@@ -116,22 +117,17 @@ class EllipticDataset:
 
         if verbose:
             total_labeled = (data_df['class'].isin([1,2])).sum()
-            licit_cnt = (data_df['class'] == 1).sum()
-            illicit_cnt = (data_df['class'] == 2).sum()
+            class1_cnt = (data_df['class'] == 1).sum()
+            class2_cnt = (data_df['class'] == 2).sum()
             print(f"   Total transactions: {len(data_df):,}")
-            print(f"   Class=1 count: {licit_cnt:,}")
-            print(f"   Class=2 count: {illicit_cnt:,}")
+            print(f"   Class=1 (Illicit): {class1_cnt:,}")
+            print(f"   Class=2 (Licit): {class2_cnt:,}")
             print(f"   Unknown (class=3): {(data_df['class'] == 3).sum():,}")
             if total_labeled > 0:
-                pct1 = 100*licit_cnt/total_labeled
-                pct2 = 100*illicit_cnt/total_labeled
-                # Choose minority label as fraud to avoid flipped label issues
-                if pct2 < pct1:
-                    self._fraud_label = 2  # standard mapping
-                else:
-                    self._fraud_label = 1  # flipped mapping detected
-                print(f"   -> Labeled distribution: class1={pct1:.2f}%, class2={pct2:.2f}%")
-                print(f"   -> Treating class {self._fraud_label} as FRAUD (positive label)")
+                fraud_pct = 100*class1_cnt/total_labeled
+                legit_pct = 100*class2_cnt/total_labeled
+                print(f"   -> Labeled distribution: Illicit={fraud_pct:.2f}%, Licit={legit_pct:.2f}%")
+                print(f"   -> Using standard Elliptic++ encoding: Class 1=Fraud, Class 2=Legit")
         
         # Create tx_id to index mapping
         tx_ids = data_df['txId'].values
@@ -142,19 +138,25 @@ class EllipticDataset:
                        if col not in ['txId', 'timestamp', 'class']]
         x = torch.FloatTensor(data_df[feature_cols].values)
         
+        # Handle NaN/Inf values (critical for stability)
+        x = torch.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0)
+        
         # Normalize features (important for GNN stability)
-        x = (x - x.mean(dim=0)) / (x.std(dim=0) + 1e-8)
+        x_mean = x.mean(dim=0)
+        x_std = x.std(dim=0)
+        x = (x - x_mean) / (x_std + 1e-8)
+        
+        # Final NaN check after normalization
+        x = torch.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0)
         
         # Extract unified timestamps
         timestamps = data_df['timestamp'].values
         
-        # Convert classes to binary with potential flip correction:
-        # Normal (expected): 2=illicit/fraud -> 1, 1=licit -> 0, 3=unlabeled -> -1
-        # If labels flipped (detected by majority illicit), invert mapping.
+        # Convert classes to binary labels for PyTorch:
+        # Elliptic++ encoding: Class 1 = Illicit (fraud), Class 2 = Licit (legit), Class 3 = Unknown
+        # Binary target: 0 = Licit, 1 = Illicit (fraud is positive class)
         y_raw = data_df['class'].values
-        fraud_label = getattr(self, '_fraud_label', 2)
-        legit_label = 1 if fraud_label == 2 else 2
-        y = np.where(y_raw == fraud_label, 1, np.where(y_raw == legit_label, 0, -1))
+        y = np.where(y_raw == 1, 1, np.where(y_raw == 2, 0, -1))  # 1->1 (fraud), 2->0 (legit), 3->-1 (unknown)
         y = torch.LongTensor(y)
         
         # Build edge index
@@ -269,7 +271,7 @@ def main():
     )
     parser.add_argument(
         '--root', 
-        default='data/elliptic',
+        default='data/Elliptic++ Dataset',
         help='Root directory containing dataset files'
     )
     

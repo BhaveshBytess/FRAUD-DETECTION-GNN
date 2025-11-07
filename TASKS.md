@@ -1,8 +1,34 @@
 # TASKS — Single Source of Truth
 
 **Project:** elliptic-gnn-baselines  
-**Last Updated:** 2025-11-05  
+**Last Updated:** 2025-11-07  
 **Status Legend:** `[ ]` pending | `[~]` in progress | `[x]` done | `[?]` blocked
+
+---
+
+## 🔄 **DATASET UPDATE - November 7, 2025 (FINAL)**
+
+**✅ DATASET ENCODING CORRECTED!**
+
+**Previous (WRONG):**
+- Used auto-detection logic that incorrectly flipped labels
+- Treated Class 2 as fraud (90.24%) ← WRONG
+
+**Current (CORRECT & VERIFIED):**
+- Class 1 = Illicit/Fraud (~9.76% of labeled) ✅
+- Class 2 = Licit/Legit (~90.24% of labeled) ✅  
+- Matches Elliptic++ paper: ~8-10% fraud rate ✅
+- Verified splits: Train=10.88%, Val=11.53%, Test=5.69% fraud ✅
+
+**Impact:** ALL previous M3/M4/M5 results are INVALID. Complete retraining required.
+
+**Action Plan:**
+1. ✅ Labels fixed in loader (`src/data/elliptic_loader.py`)
+2. ✅ Verified with `python -m src.data.elliptic_loader --check`
+3. ⏳ Update all training notebooks to retrain from scratch
+4. ⏳ Retrain all models (GCN, GraphSAGE, GAT, ML baselines) on Kaggle
+5. ⏳ Update all metrics and plots
+6. ⏳ Verify realistic performance expectations
 
 ---
 
@@ -46,18 +72,19 @@
 
 **Goal:** Implement `src/data/elliptic_loader.py` to load Elliptic++, create temporal splits, and save `splits.json`.
 
-**Status:** COMPLETE (2025-11-05)
+**Status:** COMPLETE & CORRECTED (2025-11-07)
 
 ### Steps:
 - [x] Implement `elliptic_loader.py`:
   - [x] Read `txs_features.csv` + `txs_classes.csv` + `txs_edgelist.csv`
   - [x] Merge node features and labels
+  - [x] **FIXED:** Correct label encoding (Class 1=Fraud, Class 2=Legit)
   - [x] Build `tx_id` → contiguous index mapping
   - [x] Filter edges to valid nodes only
   - [x] Create temporal splits (train/val/test) based on timestamp
   - [x] Filter edges per split (both endpoints must be in same split)
   - [x] Create PyG `Data` objects with masks
-  - [x] Save `data/elliptic/splits.json`
+  - [x] Save `data/Elliptic++ Dataset/splits.json`
 - [x] Add `--check` CLI flag to print stats
 - [x] Implement `src/data/splits.py` helper functions
 - [x] Write unit tests in `tests/test_loader.py`
@@ -67,56 +94,51 @@
 - [x] `python -m src.data.elliptic_loader --check` prints:
   - Node/edge counts ✅ (203,769 nodes, 234,355 edges)
   - Labeled node counts per split ✅ (Train: 26,381, Val: 8,999, Test: 11,184)
-  - Class balance (fraud/legit) ✅ (~10-11% fraud in train/val, ~6% in test)
+  - Class balance (fraud/legit) ✅ (~10-11% fraud in train/val, ~6% in test) **CORRECTED**
   - Time range per split ✅ (Train ≤29, Val ≤39, Test >39)
 - [x] `splits.json` saved with proper structure ✅
 - [x] Unit tests pass (no future edges in train/val) ✅ (12/12 tests passed)
 - [x] Verification checklist complete ✅
 
 ### Artifacts:
-- ✅ `src/data/elliptic_loader.py` (EllipticDataset class with CLI)
+- ✅ `src/data/elliptic_loader.py` (EllipticDataset class with CLI) **CORRECTED**
 - ✅ `src/data/splits.py` (temporal split utilities)
-- ✅ `data/elliptic/splits.json` (split boundaries and statistics)
+- ✅ `data/Elliptic++ Dataset/splits.json` (split boundaries and statistics)
 - ✅ `tests/test_loader.py` (12 unit tests, all passing)
+- ✅ `check_fraud_rate.py` (verification script) **CORRECTED**
 
-### Key Statistics:
+### Key Statistics (CORRECTED - Nov 7, 2025):
 - **Total nodes:** 203,769 (46,564 labeled, 157,205 unlabeled)
 - **Total edges:** 234,355
 - **Features:** 182 per node
-- **Train:** 26,381 nodes (2,871 fraud, 23,510 legit) - 10.88% fraud
-- **Val:** 8,999 nodes (1,038 fraud, 7,961 legit) - 11.53% fraud
-- **Test:** 11,184 nodes (636 fraud, 10,548 legit) - 5.69% fraud
+- **Class encoding:** Class 1=Illicit(Fraud-9.76%), Class 2=Licit(Legit-90.24%), Class 3=Unknown ✅
+- **Train:** 26,381 nodes (2,871 fraud, 23,510 legit) - **10.88% fraud** ✅ REALISTIC
+- **Val:** 8,999 nodes (1,038 fraud, 7,961 legit) - **11.53% fraud** ✅ REALISTIC
+- **Test:** 11,184 nodes (636 fraud, 10,548 legit) - **5.69% fraud** ✅ REALISTIC
 - **Temporal boundaries:** Train ≤29, Val ≤39, Test >39
+- **Distribution:** Fraud decreases over time (temporal shift)
 
-**Status:** COMPLETE (2025-11-05)
+**Status:** COMPLETE & VERIFIED (2025-11-07)
 
 ---
 
-## **M3 — GCN Baseline** [x]
+## **M3 — GCN Baseline** [~]
 
 **Goal:** Implement and train GCN model in a fully reproducible notebook.
 
-**Status:** ✅ COMPLETE - Trained on Kaggle GPU with full dataset
+**Status:** 🔄 **NEEDS RETRAINING** - Dataset encoding corrected (Nov 7, 2025)
 
-### Results Summary
+### Previous Results (INVALID - Wrong class encoding):
+- Test PR-AUC: 0.1976
+- Test ROC-AUC: 0.7627
+- These results used flipped labels and are NOT valid
 
-**Training Environment:**
-- Platform: Kaggle with GPU T4 x2
-- Dataset: Full Elliptic++ (203,769 nodes, 234,355 edges)
-- Training time: ~15 minutes
-- Best epoch: 100 (full run)
-
-**Test Set Performance:**
-- ✅ **ROC-AUC: 0.7627** (target: >0.80 - close!)
-- ⚠️ **PR-AUC: 0.1976** (target: >0.60 - needs improvement)
-- ⚠️ **F1 Score: 0.2487** (target: >0.30)
-- **Recall@1%: 0.0613** (6.1% fraud caught in top 1%)
-
-**Key Findings:**
-- ✅ Model trains successfully on GPU
-- ⚠️ Significant overfitting: Val PR-AUC (0.57) >> Test PR-AUC (0.20)
-- ⚠️ Temporal distribution shift: Test set harder (5.69% fraud vs 10.88% in train)
-- ⚠️ Low precision-recall performance suggests GCN struggles with severe imbalance
+### Updated Plan:
+- [x] GCN model implementation (still valid)
+- [x] Training infrastructure (still valid)
+- [ ] **RETRAIN with corrected dataset**
+- [ ] **Update metrics and plots**
+- [ ] **Verify realistic performance (expect PR-AUC ~0.15-0.25)**
 
 ### Completed Tasks
 - [x] GCN model class (2-layer architecture)
@@ -188,32 +210,23 @@
 
 ---
 
-## **M4 — GraphSAGE & GAT Notebooks** [x]
+## **M4 — GraphSAGE & GAT Notebooks** [~]
 
 **Goal:** Implement GraphSAGE and GAT models and compare performance.
 
-**Status:** ✅ COMPLETE - Both models trained on Kaggle GPU with excellent results!
+**Status:** 🔄 **NEEDS RETRAINING** - Dataset encoding corrected (Nov 7, 2025)
 
-### 🏆 **RESULTS SUMMARY**
+### Previous Results (INVALID - Wrong class encoding):
+- GraphSAGE: PR-AUC 0.4483, ROC-AUC 0.8210  
+- GAT: PR-AUC 0.1839, ROC-AUC 0.7942
+- These results used flipped labels and are NOT valid
 
-**GraphSAGE - BREAKTHROUGH! ⭐⭐⭐**
-- Test PR-AUC: **0.4483** (+127% vs GCN!) 🎉
-- Test ROC-AUC: **0.8210** (✅ Exceeds target!)
-- F1 Score: **0.4527** (✅ Exceeds target!)
-- Recall@1%: **0.1478** (141% improvement)
-- **BEST MODEL** - Production ready!
-
-**GAT - Underperforms ⚠️**
-- Test PR-AUC: 0.1839 (-6.9% vs GCN)
-- Test ROC-AUC: 0.7942
-- Recall@1%: 0.0126 (79% worse than GCN!)
-- Attention doesn't help on noisy fraud graphs
-
-### Why GraphSAGE Wins
-1. ✅ Neighborhood sampling → better generalization
-2. ✅ Robust to temporal distribution shift
-3. ✅ Simpler aggregation → less overfitting
-4. ✅ Right model capacity (24K params)
+### Updated Plan:
+- [x] GraphSAGE & GAT implementations (still valid)
+- [x] Training infrastructure (still valid)
+- [ ] **RETRAIN both models with corrected dataset**
+- [ ] **Update metrics and plots**
+- [ ] **Compare with corrected GCN baseline**
 
 ### Completed Tasks
 - [x] Create `src/models/graphsage.py` (340 lines)
@@ -262,56 +275,27 @@
 
 ---
 
-## **M5 — Tabular Baselines** [x]
+## **M5 — Tabular Baselines** [~]
 
 **Goal:** Train traditional ML models (no graph) to answer: "Does graph structure help?"
 
-**Status:** ✅ COMPLETE - Tabular models DOMINATE! Definitive answer!
+**Status:** 🔄 **NEEDS RETRAINING** - Previous results INVALID due to wrong dataset
 
-### 🚨 **KEY FINDING!** 
+### Previous Results (INVALID - 90% fraud in dataset caused unrealistic metrics):
+- XGBoost: PR-AUC 0.9914 (TOO HIGH - data leakage suspected)
+- All tabular models showed >0.98 PR-AUC (impossible for fraud detection)
+- **Root cause:** Labels were flipped + extreme class imbalance (90% fraud)
 
-**The Big Question Answered:**
-Features alone are VASTLY SUPERIOR! Graph structure adds zero value for this dataset.
+### Corrected Dataset Properties:
+- ✅ Train: 10.88% fraud (realistic!)
+- ✅ Val: 11.53% fraud (realistic!)  
+- ✅ Test: 5.69% fraud (realistic!)
 
-### 🏆 **FINAL RESULTS**
-
-| Model | PR-AUC | ROC-AUC | F1 Score | Recall@1% | Type |
-|-------|--------|---------|----------|-----------|------|
-| **XGBoost** | **0.9914** | **0.8783** | **0.9825** | **1.0000** | 🔵 Tabular |
-| Logistic Regression | 0.9887 | 0.8339 | 0.7940 | 1.0000 | 🔵 Tabular |
-| Random Forest | 0.9885 | 0.8540 | 0.9854 | 1.0000 | 🔵 Tabular |
-| MLP | 0.9846 | 0.8315 | 0.9692 | 0.9462 | 🔵 Tabular |
-| GraphSAGE | 0.4483 | 0.8210 | 0.4527 | 0.1478 | 🟢 GNN |
-| GCN | 0.1976 | 0.7627 | 0.2487 | 0.0613 | 🟢 GNN |
-| GAT | 0.1839 | 0.7942 | 0.2901 | 0.0126 | 🟢 GNN |
-
-### Key Findings
-
-**1. Dataset Characteristics (CRITICAL)**
-- **90.24% of labeled transactions are fraud!** (42,019 fraud / 4,545 legit)
-- This is the ACTUAL Elliptic++ distribution
-- Extreme imbalance makes fraud prediction "too easy" for strong features
-- Baseline PR-AUC is already 0.90 (random model)
-
-**2. Tabular Models WIN By Massive Margin**
-- XGBoost PR-AUC: **0.9914** vs GraphSAGE: 0.4483
-- XGBoost is **121% BETTER** than best GNN!
-- ALL tabular models exceed 0.98 PR-AUC
-- ALL tabular models achieve 100% recall @ top 1%
-
-**3. Why GNNs Failed**
-- ⚠️ Node features (AF1-AF182) are extremely strong predictors
-- ⚠️ Graph structure adds noise rather than signal
-- ⚠️ GNNs propagate wrong labels from neighbors
-- ⚠️ Temporal distribution shift hurts message passing
-- ⚠️ Neighborhood sampling may dilute strong node features
-
-**3. Production Recommendation**
-- ✅ **Use XGBoost** for fraud detection (0.99 PR-AUC)
-- ✅ Fast training (~2 minutes)
-- ✅ Interpretable (feature importance)
-- ✅ No GPU required
-- ❌ Do NOT use GNN models
+### Updated Plan:
+- [x] Tabular model implementations (still valid)
+- [ ] **RETRAIN all models with corrected dataset**
+- [ ] **Expect realistic PR-AUC: 0.15-0.30 for ML, 0.20-0.35 for GNNs**
+- [ ] **Answer: Does graph help? (Expect YES with corrected data!)**
 
 ### Completed Tasks
 - [x] Create `notebooks/05_tabular_baselines.ipynb`
