@@ -5,11 +5,12 @@ Loads Bitcoin transaction graph with temporal splits.
 Classes: 1=illicit (fraud), 2=licit (legitimate), 3=unknown (unlabeled)
 Encoding: Class 1 is fraud (~9.76% of labeled), Class 2 is legit (~90.24%)
 """
+from __future__ import annotations
 import os
 import json
 import argparse
 from pathlib import Path
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict, Tuple, List
 
 import numpy as np
 import pandas as pd
@@ -27,7 +28,10 @@ class EllipticDataset:
         root: str = "data/Elliptic++ Dataset",
         train_frac: float = 0.6,
         val_frac: float = 0.2,
-        test_frac: float = 0.2
+        test_frac: float = 0.2,
+        feature_subset: Optional[list[str]] = None,
+        train_time_end: Optional[int] = None,
+        val_time_end: Optional[int] = None,
     ):
         """
         Initialize Elliptic dataset loader.
@@ -37,11 +41,18 @@ class EllipticDataset:
             train_frac: Fraction of timesteps for training
             val_frac: Fraction of timesteps for validation
             test_frac: Fraction of timesteps for testing
+            feature_subset: Optional list of feature column names to keep. Used
+                for ablations (e.g., local-only or aggregate-only feature sets).
+            train_time_end: Optional explicit timestamp boundary for training.
+            val_time_end: Optional explicit timestamp boundary for validation.
         """
         self.root = Path(root)
         self.train_frac = train_frac
         self.val_frac = val_frac
         self.test_frac = test_frac
+        self.feature_subset = feature_subset
+        self.custom_train_time_end = train_time_end
+        self.custom_val_time_end = val_time_end
         
         # File paths
         self.features_path = self.root / "txs_features.csv"
@@ -51,7 +62,7 @@ class EllipticDataset:
         
         # Verify files exist
         self._verify_files()
-        
+        self.feature_columns = None
         # Load data
         self.data = None
         self.splits_info = None
@@ -134,8 +145,24 @@ class EllipticDataset:
         tx_id_to_idx = {tx_id: idx for idx, tx_id in enumerate(tx_ids)}
         
         # Extract features (exclude identifier, timestamp, class)
-        feature_cols = [col for col in data_df.columns 
+        base_feature_cols = [col for col in data_df.columns 
                        if col not in ['txId', 'timestamp', 'class']]
+        if self.feature_subset is not None:
+            missing = sorted(set(self.feature_subset) - set(base_feature_cols))
+            if missing:
+                raise ValueError(
+                    "Requested feature columns not found in dataset: "
+                    + ", ".join(missing[:10])
+                    + ("..." if len(missing) > 10 else "")
+                )
+            feature_cols = [col for col in base_feature_cols if col in self.feature_subset]
+            if not feature_cols:
+                raise ValueError("Feature subset selection resulted in zero columns.")
+        else:
+            feature_cols = base_feature_cols
+
+        self.feature_columns = feature_cols
+        
         x = torch.FloatTensor(data_df[feature_cols].values)
         
         # Handle NaN/Inf values (critical for stability)
@@ -180,12 +207,21 @@ class EllipticDataset:
         if verbose:
             print(f"\n[*] Creating temporal splits...")
         
-        splits = create_temporal_splits(
-            timestamps, 
-            self.train_frac, 
-            self.val_frac, 
-            self.test_frac
-        )
+        if self.custom_train_time_end is not None and self.custom_val_time_end is not None:
+            splits = {
+                "train": (timestamps <= self.custom_train_time_end),
+                "val": ((timestamps > self.custom_train_time_end) & (timestamps <= self.custom_val_time_end)),
+                "test": (timestamps > self.custom_val_time_end),
+                "train_time_end": self.custom_train_time_end,
+                "val_time_end": self.custom_val_time_end,
+            }
+        else:
+            splits = create_temporal_splits(
+                timestamps, 
+                self.train_frac, 
+                self.val_frac, 
+                self.test_frac
+            )
         
         # Create masks for labeled nodes only
         labeled_mask = y >= 0

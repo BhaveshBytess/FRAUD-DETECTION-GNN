@@ -16,13 +16,13 @@ Train traditional ML models on node features ONLY (no graph) and compare with GN
 
 ## 🚨 Executive Summary
 
-### **SHOCKING DISCOVERY: Tabular Models Completely Dominate!**
+### **Key Finding: XGBoost (Tabular) Outperforms GNNs**
 
-**Graph structure provides ZERO value** for fraud detection on Elliptic++ dataset.
+**Tabular models demonstrate superior performance over graph-based approaches.**
 
-- ✅ **Best Tabular Model (XGBoost):** PR-AUC = **0.9914** (99.14%)
-- ⚠️ **Best Graph Model (GraphSAGE):** PR-AUC = **0.4483** (44.83%)
-- 📊 **Performance Gap:** XGBoost is **121% BETTER** than GraphSAGE!
+- ✅ **Best Tabular Model (XGBoost):** PR-AUC = **0.669** (66.9%)
+- ⚠️ **Best Graph Model (GraphSAGE):** PR-AUC = **0.448** (44.8%)
+- 📊 **Performance Gap:** XGBoost is **49% BETTER** than GraphSAGE!
 
 ---
 
@@ -30,55 +30,56 @@ Train traditional ML models on node features ONLY (no graph) and compare with GN
 
 | Rank | Model | Type | PR-AUC | ROC-AUC | F1 Score | Recall@1% | Training Time |
 |------|-------|------|--------|---------|----------|-----------|---------------|
-| 🥇 1 | **XGBoost** | Tabular | **0.9914** | **0.8783** | **0.9825** | **1.0000** | ~2 min |
-| 🥈 2 | Logistic Regression | Tabular | 0.9887 | 0.8339 | 0.7940 | 1.0000 | ~5 sec |
-| 🥉 3 | Random Forest | Tabular | 0.9885 | 0.8540 | 0.9854 | 1.0000 | ~20 sec |
-| 4 | MLP | Tabular | 0.9846 | 0.8315 | 0.9692 | 0.9462 | ~1 min |
-| 5 | GraphSAGE | GNN | 0.4483 | 0.8210 | 0.4527 | 0.1478 | ~15 min (GPU) |
-| 6 | GCN | GNN | 0.1976 | 0.7627 | 0.2487 | 0.0613 | ~15 min (GPU) |
-| 7 | GAT | GNN | 0.1839 | 0.7942 | 0.2901 | 0.0126 | ~15 min (GPU) |
+| 🥇 1 | **XGBoost** | Tabular | **0.669** | **0.888** | **0.699** | **0.175** | ~2 min |
+| 🥈 2 | Random Forest | Tabular | 0.658 | 0.877 | 0.694 | 0.175 | ~20 sec |
+| 🥉 3 | **GraphSAGE** | GNN | **0.448** | **0.821** | **0.453** | **0.148** | ~15 min (GPU) |
+| 4 | MLP | Tabular | 0.364 | 0.830 | 0.486 | 0.094 | ~1 min |
+| 5 | GCN | GNN | 0.198 | 0.763 | 0.249 | 0.061 | ~15 min (GPU) |
+| 6 | GAT | GNN | 0.184 | 0.794 | 0.290 | 0.013 | ~15 min (GPU) |
+| 7 | Logistic Regression | Tabular | 0.164 | 0.824 | 0.256 | 0.005 | ~5 sec |
 
 ---
 
 ## 🔍 Key Findings
 
-### 1. **Tabular Models Are Superior in Every Metric**
+### 1. **XGBoost Achieves Best Overall Performance**
 
-- **PR-AUC:** All tabular models exceed **0.98** (XGBoost: 0.9914)
-- **F1 Score:** Random Forest and XGBoost achieve **>0.98** 
-- **Recall@1%:** All tabular models catch **100% of fraud** in top 1% predictions
-- **Speed:** Tabular models train in **seconds to minutes** on CPU
+- **PR-AUC:** 0.669 (strong performance on imbalanced fraud detection)
+- **F1 Score:** 0.699 (balanced precision and recall)
+- **Recall@1%:** 17.5% (efficient fraud detection in top predictions)
+- **Speed:** Trains in ~2 minutes on CPU
 
-### 2. **GNN Models Fail Dramatically**
+### 2. **GraphSAGE is Best GNN, But Still Lags**
 
-- **PR-AUC:** Best GNN (GraphSAGE) only achieves **0.4483**
-- **Gap:** 54.8% worse than XGBoost
-- **Resource Cost:** Require GPU, 10x slower training
+- **PR-AUC:** 0.448 (33% lower than XGBoost)
+- **Gap:** GraphSAGE requires GPU and more time, yet underperforms
+- **Resource Cost:** Requires GPU, 10x slower training
 - **Complexity:** Much harder to debug and interpret
 
-### 3. **Why GNNs Failed: Root Cause Analysis**
+### 3. **Why Graph Structure Has Limited Value**
 
-#### **A. Extreme Class Imbalance (90% fraud)**
-The dataset has **90.24% fraud** labels, which is inverted from typical scenarios:
-- Train: 88.73% fraud
-- Val: 90.49% fraud
-- Test: 94.52% fraud
+#### **A. Class Imbalance (~10% fraud)**
+The dataset has **~10% fraud** labels in training data:
+- Train: 10.88% fraud
+- Val: 11.53% fraud
+- Test: 5.69% fraud (temporal shift makes test harder)
 
-This extreme imbalance breaks GNN assumptions:
-- Message passing propagates **wrong labels** from fraud-heavy neighborhoods
-- Node features alone are **cleaner signals** than noisy graph structure
+This imbalance affects GNN message passing:
+- Neighborhood aggregation dilutes fraud signals
+- Node features provide cleaner, more direct signals
+- Tabular models handle imbalance better with class weights
 
 #### **B. Strong Node Features**
-The 182 node features are **extremely predictive**:
-- Even simple Logistic Regression achieves 0.9887 PR-AUC
-- Features likely encode transaction patterns, amounts, timing, etc.
-- Graph structure adds noise, not information
+The 182 node features are **highly predictive**:
+- XGBoost achieves 0.669 PR-AUC with features alone
+- Features likely encode transaction patterns, amounts, timing
+- Graph structure adds complexity without proportional benefit
 
 #### **C. Temporal Distribution Shift**
-The test set is **harder** than validation:
-- Test fraud rate increases to 94.52%
-- GNNs trained on earlier time periods fail to generalize
-- Tabular models are robust to this shift
+The test set fraud rate drops to **5.69%**:
+- Models trained on ~11% fraud must generalize to ~6%
+- XGBoost (tabular) is more robust to this shift
+- GNNs struggle with changing graph topology over time
 
 #### **D. Graph Structure Quality**
 Potential issues with graph construction:
@@ -93,8 +94,8 @@ Potential issues with graph construction:
 ### ✅ **DO: Use XGBoost for Production**
 
 **Why XGBoost?**
-- ✅ 99.14% PR-AUC (near-perfect fraud detection)
-- ✅ 100% recall @ top 1% (catches ALL fraud efficiently)
+- ✅ 66.9% PR-AUC (solid performance on challenging fraud detection)
+- ✅ 17.5% recall @ top 1% (efficient fraud detection)
 - ✅ Fast training (~2 minutes on CPU)
 - ✅ No GPU required
 - ✅ Interpretable (feature importance, SHAP values)
@@ -105,17 +106,22 @@ Potential issues with graph construction:
 1. Train XGBoost with same hyperparameters
 2. Save model with `pickle` or `joblib`
 3. Deploy on any CPU server (no GPU needed)
-4. Monitor top 1% predictions (100% recall guaranteed)
+4. Monitor top predictions for efficient fraud detection
 
-### ❌ **DON'T: Use GNN Models**
+### ⚠️ **Consider: GNN Models for Specific Use Cases**
 
-**Why NOT GNNs?**
-- ❌ 54.8% worse PR-AUC than XGBoost
+**When might GNNs add value?**
+- If fraud patterns heavily depend on network topology
+- When temporal graph evolution is critical
+- For interpretability of fraud networks (with GNNExplainer)
+
+**Current limitations:**
+- ❌ 33% lower PR-AUC than XGBoost
 - ❌ Require expensive GPU infrastructure
 - ❌ 10x slower training time
 - ❌ Harder to debug and interpret
 - ❌ Complex deployment (PyTorch Geometric, CUDA)
-- ❌ Not worth the complexity vs benefit
+- ❌ Not currently worth the complexity vs benefit
 
 ---
 
@@ -276,21 +282,22 @@ See `reports/plots/all_models_comparison.png` for bar chart comparison across al
 
 ## ✅ Conclusion
 
-**Graph Neural Networks are NOT needed for Elliptic++ fraud detection.**
+**XGBoost (tabular) outperforms GNN models for Elliptic++ fraud detection.**
 
-- ✅ **Use XGBoost:** 99.14% PR-AUC, fast, interpretable, production-ready
-- ❌ **Avoid GNNs:** 44.83% PR-AUC, slow, complex, not worth the cost
+- ✅ **Use XGBoost:** 66.9% PR-AUC, fast, interpretable, production-ready
+- ⚠️ **GNNs show promise:** GraphSAGE achieves 44.8% PR-AUC, but requires more resources
+- 📊 **Gap:** 49% performance difference suggests limited marginal benefit from graph structure
 
 **The project successfully demonstrates:**
 1. Complete GNN baseline implementation (M1-M4) ✅
 2. Strong tabular baselines (M5) ✅
 3. Fair comparison with same metrics ✅
-4. Clear evidence that graph structure doesn't help ✅
+4. Clear evidence that tabular features alone are highly effective ✅
 
 **This is a valuable portfolio project showing:**
 - Technical depth (GNNs, XGBoost, MLPs)
 - Scientific rigor (controlled experiments)
-- Business judgment (choose simple solutions)
+- Business judgment (cost-benefit analysis)
 - Communication skills (clear documentation)
 
 ---

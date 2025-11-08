@@ -122,12 +122,13 @@ class GraphSAGETrainer:
             lr: Learning rate
             weight_decay: L2 regularization
         """
-        self.model = model
-        self.data = data
         self.device = device
-        
         # Move model and data to device
-        self.model = self.model.to(device)
+        self.model = model.to(device)
+        self.data = data.to(device)
+        self.data.train_mask = self.data.train_mask.to(device)
+        self.data.val_mask = self.data.val_mask.to(device)
+        self.data.test_mask = self.data.test_mask.to(device)
         
         # Optimizer
         self.optimizer = torch.optim.Adam(

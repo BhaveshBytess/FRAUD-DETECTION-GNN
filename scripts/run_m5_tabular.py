@@ -1,370 +1,526 @@
 """
-M5 - Tabular Baselines Training Script
-Train traditional ML models on node features only (no graph)
+M5 — Tabular baselines on Elliptic++.
+
+This script is import-friendly: notebooks can reuse the helper functions
+without executing the CLI entrypoint. Run directly to train all tabular
+models locally and save metrics/plots under reports/.
 """
+from __future__ import annotations
 
-import pandas as pd
-import numpy as np
-import matplotlib
-matplotlib.use('Agg')  # Use non-interactive backend
-import matplotlib.pyplot as plt
-import seaborn as sns
 import json
+import sys
+import time
+from dataclasses import dataclass
 from pathlib import Path
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import (
-    average_precision_score,
-    roc_auc_score,
-    precision_recall_curve,
-    roc_curve,
-    f1_score,
-    classification_report
+from typing import Dict, List
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import seaborn as sns  # noqa: E402
+import xgboost as xgb  # noqa: E402
+from sklearn.ensemble import RandomForestClassifier  # noqa: E402
+from sklearn.linear_model import LogisticRegression  # noqa: E402
+from sklearn.neural_network import MLPClassifier  # noqa: E402
+from sklearn.preprocessing import StandardScaler  # noqa: E402
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.utils.logger import append_metrics_to_csv, save_metrics_json  # noqa: E402
+from src.utils.metrics import (  # noqa: E402
+    compute_metrics,
+    compute_recall_at_k,
+    find_best_f1_threshold,
 )
-from sklearn.preprocessing import StandardScaler
-import xgboost as xgb
-import warnings
-warnings.filterwarnings('ignore')
+from src.utils.seed import set_all_seeds  # noqa: E402
 
-print("="*80)
-print("M5 - TABULAR BASELINES")
-print("="*80)
+SEED = 42
+sns.set_theme(style="ticks")
 
-# Setup paths
-data_dir = Path(r'C:\Users\oumme\OneDrive\Desktop\FRAUD-DETECTION-GNN\Elliptic++ Dataset')
-reports_dir = Path(r'C:\Users\oumme\OneDrive\Desktop\FRAUD-DETECTION-GNN\reports')
-plots_dir = reports_dir / 'plots'
-plots_dir.mkdir(parents=True, exist_ok=True)
 
-print(f"\n1. Loading data from: {data_dir}")
+@dataclass
+class TabularDataset:
+    """Containers for scaled feature matrices and metadata."""
 
-# Load features and classes
-features_df = pd.read_csv(data_dir / 'txs_features.csv')
-classes_df = pd.read_csv(data_dir / 'txs_classes.csv')
+    X_train: np.ndarray
+    y_train: np.ndarray
+    X_val: np.ndarray
+    y_val: np.ndarray
+    X_test: np.ndarray
+    y_test: np.ndarray
+    feature_cols: List[str]
+    train_df: pd.DataFrame
+    val_df: pd.DataFrame
+    test_df: pd.DataFrame
+    stats: Dict[str, float]
+    scaler: StandardScaler
 
-print(f"Features shape: {features_df.shape}")
-print(f"Classes shape: {classes_df.shape}")
 
-# Merge
-df = features_df.merge(classes_df, on='txId', how='left')
-print(f"Merged shape: {df.shape}")
+@dataclass
+class ModelResult:
+    """Stores metrics and score vectors for a trained model."""
 
-# Find timestamp column
-time_col = None
-for col in ['timestamp', 'Time step', 'time_step']:
-    if col in df.columns:
-        time_col = col
-        break
+    model: str
+    metrics: Dict[str, float]
+    val_probs: np.ndarray
+    test_probs: np.ndarray
+    train_seconds: float
 
-if time_col is None:
-    raise ValueError(f"No timestamp column found! Columns: {df.columns.tolist()[:10]}...")
 
-# Normalize column name
-if time_col != 'timestamp':
-    df['timestamp'] = df[time_col]
+def _resolve_timestamp_column(df: pd.DataFrame) -> str:
+    for candidate in ("timestamp", "Time step", "time_step"):
+        if candidate in df.columns:
+            return candidate
+    raise KeyError(
+        "Could not find timestamp column. Expected one of "
+        "`timestamp`, `Time step`, or `time_step`."
+    )
 
-print(f"Timestamp column: '{time_col}' -> 'timestamp'")
-print(f"Timestamp range: {df['timestamp'].min()} to {df['timestamp'].max()}")
 
-# Filter to labeled transactions only
-df_labeled = df[df['class'].isin([1, 2])].copy()
+def load_tabular_dataset(
+    data_dir: Path,
+    selected_features: List[str] | None = None,
+    train_time_end: int | None = None,
+    val_time_end: int | None = None,
+) -> TabularDataset:
+    """Load Elliptic++ features, apply temporal split, scale features.
 
-# Map class: 1=licit (0), 2=illicit (1)
-df_labeled['label'] = (df_labeled['class'] == 2).astype(int)
+    Args:
+        data_dir: Directory containing `txs_features.csv` and `splits.json`.
+        selected_features: Optional list of feature columns to keep. If None,
+            all available feature columns are used.
+    """
+    if not data_dir.exists():
+        raise FileNotFoundError(f"Dataset directory does not exist: {data_dir}")
 
-print(f"\nLabeled transactions: {len(df_labeled):,}")
-print(f"Fraud percentage: {df_labeled['label'].mean()*100:.2f}%")
+    splits_path = data_dir / "splits.json"
+    if not splits_path.exists():
+        raise FileNotFoundError(
+            "splits.json not found. Run `python -m src.data.elliptic_loader --check` first."
+        )
 
-print("\n2. Creating temporal splits...")
+    with open(splits_path, "r", encoding="utf-8") as fp:
+        split_info = json.load(fp)
 
-# Sort by timestamp
-df_labeled = df_labeled.sort_values('timestamp')
+    # Allow overriding temporal boundaries
+    if train_time_end is not None or val_time_end is not None:
+        if train_time_end is None or val_time_end is None:
+            raise ValueError("Both train_time_end and val_time_end must be provided together.")
+        split_info["train_time_end"] = train_time_end
+        split_info["val_time_end"] = val_time_end
 
-# Split: 60% train, 20% val, 20% test (temporal)
-n = len(df_labeled)
-train_size = int(0.6 * n)
-val_size = int(0.2 * n)
+    features_df = pd.read_csv(data_dir / "txs_features.csv")
+    classes_df = pd.read_csv(data_dir / "txs_classes.csv")
+    merged = features_df.merge(classes_df, on="txId", how="left")
 
-train_df = df_labeled.iloc[:train_size]
-val_df = df_labeled.iloc[train_size:train_size+val_size]
-test_df = df_labeled.iloc[train_size+val_size:]
+    ts_col = _resolve_timestamp_column(merged)
+    if ts_col != "timestamp":
+        merged.rename(columns={ts_col: "timestamp"}, inplace=True)
 
-print(f"Train: {len(train_df):,} ({len(train_df)/n*100:.1f}%) | Fraud: {train_df['label'].mean()*100:.2f}%")
-print(f"Val:   {len(val_df):,} ({len(val_df)/n*100:.1f}%) | Fraud: {val_df['label'].mean()*100:.2f}%")
-print(f"Test:  {len(test_df):,} ({len(test_df)/n*100:.1f}%) | Fraud: {test_df['label'].mean()*100:.2f}%")
+    labeled = merged[merged["class"].isin([1, 2])].copy()
+    labeled["label"] = (labeled["class"] == 1).astype(int)
+    labeled = labeled.sort_values("timestamp")
 
-print("\n3. Preparing features...")
+    train_df = labeled[labeled["timestamp"] <= split_info["train_time_end"]].copy()
+    val_df = labeled[
+        (labeled["timestamp"] > split_info["train_time_end"])
+        & (labeled["timestamp"] <= split_info["val_time_end"])
+    ].copy()
+    test_df = labeled[labeled["timestamp"] > split_info["val_time_end"]].copy()
 
-# Identify feature columns
-exclude_cols = ['txId', 'timestamp', 'Time step', 'time_step', 'class', 'label']
-feature_cols = [col for col in df_labeled.columns if col not in exclude_cols]
+    for split_name, df in (("Train", train_df), ("Val", val_df), ("Test", test_df)):
+        if df.empty:
+            raise RuntimeError(f"{split_name} split is empty. Check split boundaries.")
 
-print(f"Number of features: {len(feature_cols)}")
+    exclude = {"txId", "timestamp", "Time step", "time_step", "class", "label"}
+    feature_cols = [col for col in labeled.columns if col not in exclude]
+    if selected_features is not None:
+        missing = sorted(set(selected_features) - set(feature_cols))
+        if missing:
+            raise ValueError(
+                "Selected features missing from dataset: "
+                + ", ".join(missing[:10])
+                + ("..." if len(missing) > 10 else "")
+            )
+        feature_cols = [col for col in feature_cols if col in selected_features]
+        if not feature_cols:
+            raise ValueError("No overlapping features after applying selection list.")
 
-# Extract features and labels
-X_train = train_df[feature_cols].values
-y_train = train_df['label'].values
+    def _values(frame: pd.DataFrame) -> np.ndarray:
+        arr = frame[feature_cols].to_numpy(dtype=np.float32)
+        return np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
 
-X_val = val_df[feature_cols].values
-y_val = val_df['label'].values
+    X_train = _values(train_df)
+    X_val = _values(val_df)
+    X_test = _values(test_df)
 
-X_test = test_df[feature_cols].values
-y_test = test_df['label'].values
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_val = scaler.transform(X_val)
+    X_test = scaler.transform(X_test)
 
-# Handle NaN/inf values
-X_train = np.nan_to_num(X_train, nan=0.0, posinf=0.0, neginf=0.0)
-X_val = np.nan_to_num(X_val, nan=0.0, posinf=0.0, neginf=0.0)
-X_test = np.nan_to_num(X_test, nan=0.0, posinf=0.0, neginf=0.0)
-
-# Standardize features
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_val_scaled = scaler.transform(X_val)
-X_test_scaled = scaler.transform(X_test)
-
-print(f"Train: X={X_train_scaled.shape}, y={y_train.shape}")
-print(f"Val:   X={X_val_scaled.shape}, y={y_val.shape}")
-print(f"Test:  X={X_test_scaled.shape}, y={y_test.shape}")
-
-# Helper functions
-def evaluate_model(y_true, y_pred_proba, model_name):
-    """Evaluate model with same metrics as GNN models"""
-    pr_auc = average_precision_score(y_true, y_pred_proba)
-    roc_auc = roc_auc_score(y_true, y_pred_proba)
-    
-    # F1 score (threshold at 0.5)
-    y_pred = (y_pred_proba >= 0.5).astype(int)
-    f1 = f1_score(y_true, y_pred)
-    
-    # Recall@1% (top 1% predictions)
-    top_1pct_idx = np.argsort(y_pred_proba)[::-1][:int(len(y_pred_proba)*0.01)]
-    recall_at_1pct = y_true[top_1pct_idx].mean()
-    
-    metrics = {
-        'model': model_name,
-        'pr_auc': float(pr_auc),
-        'roc_auc': float(roc_auc),
-        'f1_score': float(f1),
-        'recall_at_1pct': float(recall_at_1pct)
+    stats = {
+        "train_count": len(train_df),
+        "val_count": len(val_df),
+        "test_count": len(test_df),
+        "train_fraud_pct": float(train_df["label"].mean() * 100),
+        "val_fraud_pct": float(val_df["label"].mean() * 100),
+        "test_fraud_pct": float(test_df["label"].mean() * 100),
+        "train_time_end": split_info["train_time_end"],
+        "val_time_end": split_info["val_time_end"],
+        "feature_count": len(feature_cols),
     }
-    
-    print(f"\n{model_name} Results:")
-    print(f"  PR-AUC:      {pr_auc:.4f}")
-    print(f"  ROC-AUC:     {roc_auc:.4f}")
-    print(f"  F1 Score:    {f1:.4f}")
-    print(f"  Recall@1%:   {recall_at_1pct:.4f}")
-    
-    return metrics
 
-def save_metrics(metrics, filename):
-    """Save metrics to JSON file"""
-    filepath = reports_dir / filename
-    with open(filepath, 'w') as f:
-        json.dump(metrics, f, indent=2)
-    print(f"  Saved to: {filepath.name}")
+    print("\n[Data] Temporal split summary (labeled transactions only)")
+    for split_name, count_key, fraud_key in [
+        ("Train", "train_count", "train_fraud_pct"),
+        ("Val", "val_count", "val_fraud_pct"),
+        ("Test", "test_count", "test_fraud_pct"),
+    ]:
+        print(
+            f"  {split_name:<5}: {stats[count_key]:>6} nodes | "
+            f"Fraud={stats[fraud_key]:5.2f}%"
+        )
 
-# Train models
-all_results = []
+    return TabularDataset(
+        X_train=X_train,
+        y_train=train_df["label"].to_numpy(),
+        X_val=X_val,
+        y_val=val_df["label"].to_numpy(),
+        X_test=X_test,
+        y_test=test_df["label"].to_numpy(),
+        feature_cols=feature_cols,
+        train_df=train_df,
+        val_df=val_df,
+        test_df=test_df,
+        stats=stats,
+        scaler=scaler,
+    )
 
-# 1. Logistic Regression
-print("\n" + "="*80)
-print("4. Training Logistic Regression...")
-print("="*80)
 
-lr_model = LogisticRegression(
-    max_iter=1000,
-    class_weight='balanced',
-    random_state=42,
-    n_jobs=-1
-)
+def subset_tabular_dataset(
+    base: TabularDataset,
+    selected_features: List[str],
+) -> TabularDataset:
+    """Create a new TabularDataset with a subset of features (re-scaling data)."""
+    if not selected_features:
+        raise ValueError("selected_features must contain at least one column.")
 
-lr_model.fit(X_train_scaled, y_train)
-lr_proba = lr_model.predict_proba(X_test_scaled)[:, 1]
-lr_metrics = evaluate_model(y_test, lr_proba, 'Logistic Regression')
-save_metrics(lr_metrics, 'logistic_regression_metrics.json')
-all_results.append(lr_metrics)
+    base_feature_set = set(base.feature_cols)
+    missing = sorted(set(selected_features) - base_feature_set)
+    if missing:
+        raise ValueError(
+            "Selected features missing from base dataset: "
+            + ", ".join(missing[:10])
+            + ("..." if len(missing) > 10 else "")
+        )
 
-# 2. Random Forest
-print("\n" + "="*80)
-print("5. Training Random Forest...")
-print("="*80)
+    feature_cols = [col for col in base.feature_cols if col in selected_features]
+    if not feature_cols:
+        raise ValueError("No overlapping features after applying selection list.")
 
-rf_model = RandomForestClassifier(
-    n_estimators=200,
-    max_depth=20,
-    min_samples_split=10,
-    min_samples_leaf=4,
-    class_weight='balanced',
-    random_state=42,
-    n_jobs=-1,
-    verbose=0
-)
+    def _values(frame: pd.DataFrame) -> np.ndarray:
+        arr = frame[feature_cols].to_numpy(dtype=np.float32)
+        return np.nan_to_num(arr, nan=0.0, posinf=0.0, neginf=0.0)
 
-rf_model.fit(X_train_scaled, y_train)
-rf_proba = rf_model.predict_proba(X_test_scaled)[:, 1]
-rf_metrics = evaluate_model(y_test, rf_proba, 'Random Forest')
-save_metrics(rf_metrics, 'random_forest_metrics.json')
-all_results.append(rf_metrics)
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(_values(base.train_df))
+    X_val = scaler.transform(_values(base.val_df))
+    X_test = scaler.transform(_values(base.test_df))
 
-# 3. XGBoost
-print("\n" + "="*80)
-print("6. Training XGBoost...")
-print("="*80)
+    stats = base.stats.copy()
+    stats["feature_count"] = len(feature_cols)
 
-scale_pos_weight = len(y_train) / y_train.sum() - 1
-print(f"Scale pos weight: {scale_pos_weight:.2f}")
+    return TabularDataset(
+        X_train=X_train,
+        y_train=base.y_train,
+        X_val=X_val,
+        y_val=base.y_val,
+        X_test=X_test,
+        y_test=base.y_test,
+        feature_cols=feature_cols,
+        train_df=base.train_df,
+        val_df=base.val_df,
+        test_df=base.test_df,
+        stats=stats,
+        scaler=scaler,
+    )
 
-xgb_model = xgb.XGBClassifier(
-    n_estimators=300,
-    max_depth=10,
-    learning_rate=0.05,
-    subsample=0.8,
-    colsample_bytree=0.8,
-    scale_pos_weight=scale_pos_weight,
-    random_state=42,
-    n_jobs=-1,
-    tree_method='hist',
-    verbosity=0
-)
 
-xgb_model.fit(
-    X_train_scaled, y_train,
-    eval_set=[(X_val_scaled, y_val)],
-    verbose=False
-)
+def _evaluate_predictions(
+    model_name: str,
+    y_val: np.ndarray,
+    val_probs: np.ndarray,
+    y_test: np.ndarray,
+    test_probs: np.ndarray,
+) -> Dict[str, float]:
+    threshold, best_f1 = find_best_f1_threshold(y_val, val_probs)
+    metrics = compute_metrics(y_test, test_probs, threshold=threshold)
+    recall_dict = compute_recall_at_k(y_test, test_probs, k_fracs=[0.01])
+    metrics.update(
+        {
+            "model": model_name,
+            "best_val_f1": float(best_f1),
+            "recall@1.0%": float(recall_dict["recall@1.0%"]),
+        }
+    )
+    # Ensure all numeric values are native Python floats for JSON serialization.
+    clean_metrics = {}
+    for key, value in metrics.items():
+        if isinstance(value, (np.floating, np.integer)):
+            clean_metrics[key] = float(value)
+        else:
+            clean_metrics[key] = value
+    return clean_metrics
 
-xgb_proba = xgb_model.predict_proba(X_test_scaled)[:, 1]
-xgb_metrics = evaluate_model(y_test, xgb_proba, 'XGBoost')
-save_metrics(xgb_metrics, 'xgboost_metrics.json')
-all_results.append(xgb_metrics)
 
-# 4. MLP
-print("\n" + "="*80)
-print("7. Training MLP...")
-print("="*80)
+def train_logistic_regression(data: TabularDataset) -> ModelResult:
+    start = time.perf_counter()
+    model = LogisticRegression(
+        max_iter=1000,
+        class_weight="balanced",
+        random_state=SEED,
+        n_jobs=-1,
+    )
+    model.fit(data.X_train, data.y_train)
+    val_probs = model.predict_proba(data.X_val)[:, 1]
+    test_probs = model.predict_proba(data.X_test)[:, 1]
+    metrics = _evaluate_predictions("Logistic Regression", data.y_val, val_probs, data.y_test, test_probs)
+    elapsed = time.perf_counter() - start
+    print(
+        f"[LR] PR-AUC={metrics['pr_auc']:.4f} | ROC-AUC={metrics['roc_auc']:.4f} | "
+        f"F1={metrics['f1']:.4f} | t={elapsed:.1f}s"
+    )
+    return ModelResult("Logistic Regression", metrics, val_probs, test_probs, elapsed)
 
-mlp_model = MLPClassifier(
-    hidden_layer_sizes=(256, 128, 64),
-    activation='relu',
-    solver='adam',
-    alpha=0.0001,
-    batch_size=256,
-    learning_rate='adaptive',
-    learning_rate_init=0.001,
-    max_iter=100,
-    random_state=42,
-    verbose=False,
-    early_stopping=True,
-    validation_fraction=0.1
-)
 
-mlp_model.fit(X_train_scaled, y_train)
-mlp_proba = mlp_model.predict_proba(X_test_scaled)[:, 1]
-mlp_metrics = evaluate_model(y_test, mlp_proba, 'MLP')
-save_metrics(mlp_metrics, 'mlp_metrics.json')
-all_results.append(mlp_metrics)
+def train_random_forest(data: TabularDataset) -> ModelResult:
+    start = time.perf_counter()
+    model = RandomForestClassifier(
+        n_estimators=300,
+        max_depth=18,
+        min_samples_split=4,
+        min_samples_leaf=2,
+        class_weight="balanced",
+        n_jobs=4,
+        random_state=SEED,
+    )
+    model.fit(data.X_train, data.y_train)
+    val_probs = model.predict_proba(data.X_val)[:, 1]
+    test_probs = model.predict_proba(data.X_test)[:, 1]
+    metrics = _evaluate_predictions("Random Forest", data.y_val, val_probs, data.y_test, test_probs)
+    elapsed = time.perf_counter() - start
+    print(
+        f"[RF] PR-AUC={metrics['pr_auc']:.4f} | ROC-AUC={metrics['roc_auc']:.4f} | "
+        f"F1={metrics['f1']:.4f} | t={elapsed:.1f}s"
+    )
+    return ModelResult("Random Forest", metrics, val_probs, test_probs, elapsed)
 
-# Compare with GNN models
-print("\n" + "="*80)
-print("8. Comparing with GNN models...")
-print("="*80)
 
-gnn_results = [
-    {'model': 'GCN', 'pr_auc': 0.1976, 'roc_auc': 0.7627, 'f1_score': 0.2487, 'recall_at_1pct': 0.0613},
-    {'model': 'GraphSAGE', 'pr_auc': 0.4483, 'roc_auc': 0.8210, 'f1_score': 0.4527, 'recall_at_1pct': 0.1478},
-    {'model': 'GAT', 'pr_auc': 0.1839, 'roc_auc': 0.7942, 'f1_score': 0.2901, 'recall_at_1pct': 0.0126}
-]
+def train_xgboost(data: TabularDataset) -> ModelResult:
+    start = time.perf_counter()
+    scale_pos_weight = (data.y_train == 0).sum() / max((data.y_train == 1).sum(), 1)
+    model = xgb.XGBClassifier(
+        n_estimators=400,
+        max_depth=8,
+        learning_rate=0.05,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        reg_alpha=0.0,
+        reg_lambda=1.0,
+        scale_pos_weight=scale_pos_weight,
+        random_state=SEED,
+        tree_method="hist",
+        eval_metric="aucpr",
+        n_jobs=-1,
+        early_stopping_rounds=20,
+    )
+    model.fit(
+        data.X_train,
+        data.y_train,
+        eval_set=[(data.X_val, data.y_val)],
+        verbose=False,
+    )
+    val_probs = model.predict_proba(data.X_val)[:, 1]
+    test_probs = model.predict_proba(data.X_test)[:, 1]
+    metrics = _evaluate_predictions("XGBoost", data.y_val, val_probs, data.y_test, test_probs)
+    elapsed = time.perf_counter() - start
+    print(
+        f"[XGB] PR-AUC={metrics['pr_auc']:.4f} | ROC-AUC={metrics['roc_auc']:.4f} | "
+        f"F1={metrics['f1']:.4f} | t={elapsed:.1f}s"
+    )
+    return ModelResult("XGBoost", metrics, val_probs, test_probs, elapsed)
 
-all_results.extend(gnn_results)
 
-# Create comparison dataframe
-df_results = pd.DataFrame(all_results)
-df_results = df_results.sort_values('pr_auc', ascending=False)
+def train_mlp(data: TabularDataset) -> ModelResult:
+    start = time.perf_counter()
+    pos_weight = (data.y_train == 0).sum() / max((data.y_train == 1).sum(), 1)
+    sample_weight = np.where(data.y_train == 1, pos_weight, 1.0)
+    model = MLPClassifier(
+        hidden_layer_sizes=(256, 128, 64),
+        activation="relu",
+        learning_rate="adaptive",
+        learning_rate_init=1e-3,
+        batch_size=512,
+        max_iter=200,
+        early_stopping=True,
+        validation_fraction=0.1,
+        random_state=SEED,
+    )
+    model.fit(data.X_train, data.y_train, sample_weight=sample_weight)
+    val_probs = model.predict_proba(data.X_val)[:, 1]
+    test_probs = model.predict_proba(data.X_test)[:, 1]
+    metrics = _evaluate_predictions("MLP", data.y_val, val_probs, data.y_test, test_probs)
+    elapsed = time.perf_counter() - start
+    print(
+        f"[MLP] PR-AUC={metrics['pr_auc']:.4f} | ROC-AUC={metrics['roc_auc']:.4f} | "
+        f"F1={metrics['f1']:.4f} | t={elapsed:.1f}s"
+    )
+    return ModelResult("MLP", metrics, val_probs, test_probs, elapsed)
 
-print("\n" + "="*80)
-print("FINAL RESULTS - ALL MODELS")
-print("="*80)
-print(df_results.to_string(index=False))
 
-# Save to CSV
-csv_path = reports_dir / 'all_models_comparison.csv'
-df_results.to_csv(csv_path, index=False)
-print(f"\nSaved comparison to: {csv_path.name}")
+def summarize_results(results: List[ModelResult]) -> pd.DataFrame:
+    """Convert model results to a DataFrame sorted by PR-AUC."""
+    df = pd.DataFrame([res.metrics for res in results])
+    return df.sort_values("pr_auc", ascending=False)
 
-# Create visualization
-print("\n9. Creating comparison plots...")
 
-fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+def _model_filename(model_name: str) -> str:
+    return (
+        model_name.lower()
+        .replace(" ", "_")
+        .replace("-", "_")
+        + "_metrics.json"
+    )
 
-metrics_to_plot = ['pr_auc', 'roc_auc', 'f1_score', 'recall_at_1pct']
-titles = ['PR-AUC (Higher is Better)', 'ROC-AUC (Higher is Better)', 
-          'F1 Score (Higher is Better)', 'Recall@1% (Higher is Better)']
 
-for idx, (metric, title) in enumerate(zip(metrics_to_plot, titles)):
-    ax = axes[idx // 2, idx % 2]
-    
-    # Sort by metric for this plot
-    df_sorted = df_results.sort_values(metric, ascending=True)
-    
-    # Color: green for GNN, blue for tabular
-    colors = ['green' if model in ['GCN', 'GraphSAGE', 'GAT'] else 'blue' 
-              for model in df_sorted['model']]
-    
-    ax.barh(df_sorted['model'], df_sorted[metric], color=colors, alpha=0.7)
-    ax.set_xlabel(metric.upper())
-    ax.set_title(title)
-    ax.grid(axis='x', alpha=0.3)
-    
-    # Add values on bars
-    for i, (model, value) in enumerate(zip(df_sorted['model'], df_sorted[metric])):
-        ax.text(value, i, f' {value:.4f}', va='center', fontsize=9)
+def save_artifacts(
+    results: List[ModelResult],
+    y_test: np.ndarray,
+    reports_dir: Path,
+    experiment_name: str = "elliptic-gnn-baselines",
+):
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    plots_dir = reports_dir / "plots"
+    plots_dir.mkdir(parents=True, exist_ok=True)
 
-plt.tight_layout()
-plot_path = plots_dir / 'all_models_comparison.png'
-plt.savefig(plot_path, dpi=150, bbox_inches='tight')
-print(f"Saved plot to: {plot_path.name}")
-plt.close()
+    summary_path = reports_dir / "metrics_summary.csv"
 
-# Analysis
-print("\n" + "="*80)
-print("GRAPH STRUCTURE VALUE ANALYSIS")
-print("="*80)
+    for res in results:
+        metrics = res.metrics.copy()
+        save_metrics_json(metrics, reports_dir / _model_filename(res.model))
+        append_metrics_to_csv(
+            metrics,
+            filepath=summary_path,
+            experiment_name=experiment_name,
+            model_name=res.model,
+            split="test",
+        )
 
-tabular_models = df_results[~df_results['model'].isin(['GCN', 'GraphSAGE', 'GAT'])]
-best_tabular = tabular_models.loc[tabular_models['pr_auc'].idxmax()]
+    df = summarize_results(results)
+    comparison_csv = reports_dir / "all_models_comparison.csv"
+    df.to_csv(comparison_csv, index=False)
 
-graphsage = df_results[df_results['model'] == 'GraphSAGE'].iloc[0]
+    print(f"\n[Artifacts] Saved comparison CSV to {comparison_csv}")
 
-improvement = ((graphsage['pr_auc'] - best_tabular['pr_auc']) / best_tabular['pr_auc']) * 100
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    for ax, metric, title in zip(
+        axes,
+        ["pr_auc", "roc_auc", "f1"],
+        ["PR-AUC (Primary)", "ROC-AUC", "F1 (val threshold)"],
+    ):
+        ordered = df.sort_values(metric, ascending=True)
+        ax.barh(ordered["model"], ordered[metric], color="steelblue", alpha=0.8)
+        ax.set_xlabel(metric.upper())
+        ax.set_title(title)
+        ax.grid(axis="x", alpha=0.3, linestyle="--", linewidth=0.5)
+        for idx, value in enumerate(ordered[metric]):
+            ax.text(value + 0.005, idx, f"{value:.3f}", va="center", fontsize=8)
+    plt.tight_layout()
+    comp_plot = plots_dir / "all_models_comparison.png"
+    plt.savefig(comp_plot, bbox_inches="tight", dpi=150)
+    plt.close(fig)
+    print(f"[Artifacts] Saved comparison plot to {comp_plot}")
 
-print(f"\nBest Tabular Model:  {best_tabular['model']}")
-print(f"  PR-AUC: {best_tabular['pr_auc']:.4f}")
-print(f"\nBest Graph Model:    GraphSAGE")
-print(f"  PR-AUC: {graphsage['pr_auc']:.4f}")
-print(f"\nImprovement: {improvement:+.1f}%")
+    best_result = max(results, key=lambda r: r.metrics["pr_auc"])
+    precision, recall, _ = compute_recall_curve(y_test, best_result.test_probs)
+    fpr, tpr, _ = compute_roc_curve(y_test, best_result.test_probs)
 
-if improvement > 20:
-    conclusion = "SIGNIFICANT"
-    recommendation = "GNNs are essential for fraud detection on this dataset."
-elif improvement > 5:
-    conclusion = "MODERATE"
-    recommendation = "Consider ensemble of GNN + tabular models."
-else:
-    conclusion = "MINIMAL"
-    recommendation = "Tabular models may be sufficient."
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    axes[0].plot(recall, precision, label=f"{best_result.model} (AP={best_result.metrics['pr_auc']:.3f})")
+    axes[0].set_xlabel("Recall")
+    axes[0].set_ylabel("Precision")
+    axes[0].set_title("Precision-Recall Curve")
+    axes[0].grid(alpha=0.3)
 
-print(f"\n✅ CONCLUSION: Graph structure adds {conclusion} value!")
-print(f"   → {recommendation}")
+    axes[1].plot(fpr, tpr, label=f"{best_result.model} (ROC-AUC={best_result.metrics['roc_auc']:.3f})")
+    axes[1].plot([0, 1], [0, 1], linestyle="--", color="gray")
+    axes[1].set_xlabel("False Positive Rate")
+    axes[1].set_ylabel("True Positive Rate")
+    axes[1].set_title("ROC Curve")
+    axes[1].grid(alpha=0.3)
 
-print("\n" + "="*80)
-print("M5 - COMPLETE!")
-print("="*80)
-print("\nDeliverables:")
-print("  ✅ 4 tabular models trained and evaluated")
-print("  ✅ Metrics saved to reports/*.json")
-print("  ✅ Comparison CSV: reports/all_models_comparison.csv")
-print("  ✅ Visualization: reports/plots/all_models_comparison.png")
-print("  ✅ Graph value analysis complete")
-print("\nNext: M6 - Final verification and documentation")
-print("="*80)
+    for ax in axes:
+        ax.legend(loc="lower right")
+    plt.tight_layout()
+    curve_plot = plots_dir / f"{best_result.model.lower().replace(' ', '_')}_pr_roc.png"
+    plt.savefig(curve_plot, bbox_inches="tight", dpi=150)
+    plt.close(fig)
+    print(f"[Artifacts] Saved PR/ROC curves to {curve_plot}")
+
+
+def compute_recall_curve(y_true: np.ndarray, y_scores: np.ndarray):
+    from sklearn.metrics import precision_recall_curve
+
+    precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+    return precision, recall, thresholds
+
+
+def compute_roc_curve(y_true: np.ndarray, y_scores: np.ndarray):
+    from sklearn.metrics import roc_curve
+
+    return roc_curve(y_true, y_scores)
+
+
+def run_all_models(data: TabularDataset) -> List[ModelResult]:
+    """Convenience helper used by notebooks."""
+    return [
+        train_logistic_regression(data),
+        train_random_forest(data),
+        train_xgboost(data),
+        train_mlp(data),
+    ]
+
+
+def main():
+    set_all_seeds(SEED)
+    data_dir = PROJECT_ROOT / "data" / "Elliptic++ Dataset"
+    reports_dir = PROJECT_ROOT / "reports"
+
+    print("=" * 80)
+    print("M5 — TABULAR BASELINES (LOCAL)")
+    print("=" * 80)
+    print(f"Project root : {PROJECT_ROOT}")
+    print(f"Data directory: {data_dir}")
+    print(f"Reports dir  : {reports_dir}")
+    print("=" * 80)
+
+    data = load_tabular_dataset(data_dir)
+    results = run_all_models(data)
+
+    df = summarize_results(results)
+    print("\nFinal Tabular Results (sorted by PR-AUC)")
+    print(df[["model", "pr_auc", "roc_auc", "f1", "recall@1.0%", "threshold"]])
+
+    save_artifacts(results, data.y_test, reports_dir)
+
+    print("\n[Next] Compare against GNN baselines after they are retrained with the corrected labels.")
+
+
+if __name__ == "__main__":
+    main()
