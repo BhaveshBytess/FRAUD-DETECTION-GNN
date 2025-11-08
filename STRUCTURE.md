@@ -60,15 +60,20 @@ Metrics (JSON, CSV), plots (PNG), and result summaries organized by milestone (M
 
 ### `docs/`
 In-depth documentation:
-- `README_FULL.md` — Comprehensive README
-- `PROJECT_SPEC.md` — Technical specification
-- `PROJECT_REPORT.md` — Full analysis report
-- `TASKS.md` — Milestone tracker
-- `AGENT.md` — Development workflow and discipline
-- Milestone-specific docs (M4–M9)
+- `README_FULL.md` — Comprehensive README with all details
+- `PROJECT_SPEC.md` — Technical specification and architecture
+- `PROJECT_REPORT.md` — Full research report with findings
+- `M7_CAUSALITY_EXPERIMENT.md` — Feature dominance ablation design
+- `M7_RESULTS.md` — Causality experiment results
+- `M8_INTERPRETABILITY.md` — SHAP and saliency analysis
+- `M9_TEMPORAL.md` — Temporal robustness study
+- `FEATURE_ANALYSIS.md` — Dataset feature correlations
+- `DATA_TYPES_EXPLAINED.md` — Feature schema reference
+- `M5_RESULTS_SUMMARY.md` — Tabular baseline results
+- `archive/` — Internal working docs (not for public view)
 
 ### `archive/`
-Deprecated files (old READMEs, summaries) — not tracked in git.
+Old files and internal working documents (ignored by git).
 
 ## Clean Commit History
 
@@ -90,4 +95,4 @@ When adding files:
 
 ---
 
-Last updated: 2025-11-08
+Last updated: 2025-11-09

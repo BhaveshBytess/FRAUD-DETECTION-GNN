@@ -55,6 +55,16 @@ archive/
 *_OLD.*
 *_backup.*
 
+# Internal working docs (not for public view)
+docs/AGENT.md
+docs/TASKS.md
+docs/START-PROMPT.md
+docs/M4_INSTRUCTIONS.md
+docs/M5_INSTRUCTIONS.md
+docs/M7_KAGGLE_RUNBOOK.md
+docs/KAGGLE_INSTRUCTIONS.md
+docs/archive/
+
 # Logs
 *.log
 logs/
