@@ -70,7 +70,7 @@ python -m venv venv && source venv/bin/activate  # Windows: venv\Scripts\activat
 pip install -r requirements.txt
 
 # 2️⃣ Download Elliptic++ dataset (NOT included in repo)
-# Get from: https://www.kaggle.com/datasets/ellipticco/elliptic-data-set
+# Get from: https://drive.google.com/drive/folders/1MRPXz79Lu_JGLlJ21MDfML44dKN9R08l
 # Place these files in: data/Elliptic++ Dataset/
 #   ├── txs_features.csv
 #   ├── txs_classes.csv
@@ -108,7 +108,7 @@ ls reports/plots/  # Figures
 | **Timespan** | 49 timesteps (temporal graph) |
 | **Task** | Binary fraud classification |
 
-⚠️ **Dataset NOT included** — Download from [Kaggle](https://www.kaggle.com/datasets/ellipticco/elliptic-data-set) (requires account, free)
+⚠️ **Dataset NOT included** — Download from [Google Drive](https://drive.google.com/drive/folders/1MRPXz79Lu_JGLlJ21MDfML44dKN9R08l) (public access, no sign-in required)
 
 **Required files:**
 ```
@@ -202,6 +202,7 @@ If you use this code or findings, please cite:
 ## 📬 **Contact & License**
 
 **Author:** Bhavesh Bytes  
+**Email:** 10bhavesh7.11@gmail.com  
 **GitHub:** [@BhaveshBytess](https://github.com/BhaveshBytess)  
 **License:** [MIT License](LICENSE)
 

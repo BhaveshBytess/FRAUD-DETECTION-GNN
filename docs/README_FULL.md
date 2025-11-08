@@ -4,7 +4,7 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-complete-success)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.XXXXXXX-blue)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://img.shields.io/badge/DOI-Pending-blue)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN)
 
 **TL;DR:** XGBoost (tabular) outperforms standard GNN (Graph Neural Network) baselines (GraphSAGE, GCN, GAT) on Elliptic++ for fraud detection (PR-AUC: XGBoost=0.669 vs GraphSAGE=0.448); feature ablation experiments reveal that precomputed aggregate features (AF94–AF182) make GNNs redundant unless removed, improving GraphSAGE by 24% when using local-only features.
 
@@ -107,7 +107,7 @@ The Elliptic++ dataset's **aggregate features (AF94–AF182) already encode grap
 **Important:** The dataset files are NOT included in this repository due to size and licensing. Users must download the dataset separately.
 
 **Download Instructions:**
-1. Download the Elliptic++ dataset from: [TODO: Add official dataset URL or Kaggle link]
+1. Download the Elliptic++ dataset from: [Google Drive (public access)](https://drive.google.com/drive/folders/1MRPXz79Lu_JGLlJ21MDfML44dKN9R08l)
 2. Extract files to: `data/Elliptic++ Dataset/`
 3. Required files:
    - `txs_features.csv` — Transaction features (203,769 rows × 182 columns)
@@ -130,7 +130,7 @@ Anti-Money Laundering in Bitcoin: Experimenting with Graph Convolutional Network
 arXiv preprint arXiv:1908.02591.
 ```
 
-**Licensing:** Please review the dataset's licensing terms before use. [TODO: Add specific license information if available]
+**Licensing:** The Elliptic++ dataset is provided for research purposes. See the original paper (Weber et al., 2019) for citation requirements.
 
 ---
 
@@ -245,15 +245,6 @@ conda activate elliptic-gnn
 
 # Install dependencies
 pip install -r requirements.txt
-```
-
-**Option 3: Docker (TODO)**
-```bash
-# Build Docker image
-docker build -t elliptic-gnn .
-
-# Run container
-docker run -it -v $(pwd)/data:/app/data elliptic-gnn
 ```
 
 ### Data Validation
@@ -727,9 +718,8 @@ Machine-readable citation metadata is available in [`CITATION.cff`](CITATION.cff
 **Primary Contact:**
 - **Name:** Bhavesh Bytes
 - **Affiliation:** Independent Researcher
-- **Email:** bhaveshbytes@example.com (TODO: Update with real email)
+- **Email:** 10bhavesh7.11@gmail.com
 - **GitHub:** [@BhaveshBytess](https://github.com/BhaveshBytess)
-- **ORCID:** (TODO: Add if available)
 
 **Repository:**
 - **GitHub:** https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN
@@ -744,7 +734,7 @@ Machine-readable citation metadata is available in [`CITATION.cff`](CITATION.cff
 
 ### Q: Where do I get the dataset?
 
-**A:** The Elliptic++ dataset is NOT included in this repository. Download it from [TODO: Add official source] and place files in `data/Elliptic++ Dataset/`. See the [Dataset section](#dataset) for complete instructions.
+**A:** The Elliptic++ dataset is NOT included in this repository. Download it from [Google Drive (public access)](https://drive.google.com/drive/folders/1MRPXz79Lu_JGLlJ21MDfML44dKN9R08l) and place files in `data/Elliptic++ Dataset/`. See the [Dataset section](#dataset) for complete instructions.
 
 ### Q: I'm getting "File not found" errors
 
