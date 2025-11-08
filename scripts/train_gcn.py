@@ -28,7 +28,7 @@ print(f"[OK] Seeds set to {SEED}\n")
 print("=" * 60)
 print("Loading Elliptic++ Dataset")
 print("=" * 60)
-dataset = EllipticDataset(root='data/elliptic')
+dataset = EllipticDataset(root='data/Elliptic++ Dataset')
 data = dataset.load(verbose=True)
 
 # Device

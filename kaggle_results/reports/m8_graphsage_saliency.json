@@ -1,0 +1,275 @@
+[
+  {
+    "node_id": 156892,
+    "label": 1,
+    "top_features": [
+      {
+        "feature": "Local_feature_3",
+        "importance": 0.15067650377750397
+      },
+      {
+        "feature": "Local_feature_90",
+        "importance": 0.1009245216846466
+      },
+      {
+        "feature": "Local_feature_55",
+        "importance": 0.06384488195180893
+      },
+      {
+        "feature": "Local_feature_53",
+        "importance": 0.057497259229421616
+      },
+      {
+        "feature": "Local_feature_89",
+        "importance": 0.03645580634474754
+      },
+      {
+        "feature": "Local_feature_91",
+        "importance": 0.0363595187664032
+      },
+      {
+        "feature": "Local_feature_52",
+        "importance": 0.033107057213783264
+      },
+      {
+        "feature": "Local_feature_88",
+        "importance": 0.02509060874581337
+      },
+      {
+        "feature": "Local_feature_54",
+        "importance": 0.023678122088313103
+      },
+      {
+        "feature": "Local_feature_83",
+        "importance": 0.02339623123407364
+      }
+    ],
+    "top_neighbors": [
+      {
+        "neighbor_id": 156892,
+        "prob": 0.8710135817527771
+      }
+    ],
+    "plot_path": "/kaggle/working/elliptic-gnn-baselines/elliptic-gnn-baseline/reports/plots/m8_graphsage_saliency_node156892.png"
+  },
+  {
+    "node_id": 158516,
+    "label": 1,
+    "top_features": [
+      {
+        "feature": "Local_feature_90",
+        "importance": 0.09285015612840652
+      },
+      {
+        "feature": "Local_feature_53",
+        "importance": 0.07001613080501556
+      },
+      {
+        "feature": "Local_feature_3",
+        "importance": 0.06679490953683853
+      },
+      {
+        "feature": "Local_feature_55",
+        "importance": 0.06254220753908157
+      },
+      {
+        "feature": "Local_feature_89",
+        "importance": 0.04911831393837929
+      },
+      {
+        "feature": "Local_feature_52",
+        "importance": 0.04463723301887512
+      },
+      {
+        "feature": "Local_feature_54",
+        "importance": 0.02657533623278141
+      },
+      {
+        "feature": "Local_feature_88",
+        "importance": 0.01878674328327179
+      },
+      {
+        "feature": "Local_feature_83",
+        "importance": 0.014669672586023808
+      },
+      {
+        "feature": "Local_feature_40",
+        "importance": 0.013573777861893177
+      }
+    ],
+    "top_neighbors": [
+      {
+        "neighbor_id": 158516,
+        "prob": 0.8692896962165833
+      },
+      {
+        "neighbor_id": 159887,
+        "prob": 0.4290130138397217
+      }
+    ],
+    "plot_path": "/kaggle/working/elliptic-gnn-baselines/elliptic-gnn-baseline/reports/plots/m8_graphsage_saliency_node158516.png"
+  },
+  {
+    "node_id": 158513,
+    "label": 1,
+    "top_features": [
+      {
+        "feature": "Local_feature_90",
+        "importance": 0.09707842022180557
+      },
+      {
+        "feature": "Local_feature_3",
+        "importance": 0.08125948905944824
+      },
+      {
+        "feature": "Local_feature_53",
+        "importance": 0.07139012962579727
+      },
+      {
+        "feature": "Local_feature_55",
+        "importance": 0.07136613875627518
+      },
+      {
+        "feature": "Local_feature_52",
+        "importance": 0.041337497532367706
+      },
+      {
+        "feature": "Local_feature_91",
+        "importance": 0.03438356891274452
+      },
+      {
+        "feature": "Local_feature_89",
+        "importance": 0.03107323870062828
+      },
+      {
+        "feature": "Local_feature_88",
+        "importance": 0.02634447254240513
+      },
+      {
+        "feature": "Local_feature_54",
+        "importance": 0.026081403717398643
+      },
+      {
+        "feature": "Local_feature_83",
+        "importance": 0.024951765313744545
+      }
+    ],
+    "top_neighbors": [
+      {
+        "neighbor_id": 158513,
+        "prob": 0.8655956983566284
+      },
+      {
+        "neighbor_id": 159568,
+        "prob": 0.0204708781093359
+      }
+    ],
+    "plot_path": "/kaggle/working/elliptic-gnn-baselines/elliptic-gnn-baseline/reports/plots/m8_graphsage_saliency_node158513.png"
+  },
+  {
+    "node_id": 158398,
+    "label": 1,
+    "top_features": [
+      {
+        "feature": "Local_feature_90",
+        "importance": 0.09841343760490417
+      },
+      {
+        "feature": "Local_feature_3",
+        "importance": 0.0664718970656395
+      },
+      {
+        "feature": "Local_feature_55",
+        "importance": 0.060442157089710236
+      },
+      {
+        "feature": "Local_feature_53",
+        "importance": 0.05597678944468498
+      },
+      {
+        "feature": "Local_feature_69",
+        "importance": 0.04732612520456314
+      },
+      {
+        "feature": "Local_feature_93",
+        "importance": 0.04525027796626091
+      },
+      {
+        "feature": "Local_feature_80",
+        "importance": 0.04512689635157585
+      },
+      {
+        "feature": "Local_feature_63",
+        "importance": 0.04406947270035744
+      },
+      {
+        "feature": "Local_feature_81",
+        "importance": 0.043618351221084595
+      },
+      {
+        "feature": "Local_feature_92",
+        "importance": 0.04312516003847122
+      }
+    ],
+    "top_neighbors": [
+      {
+        "neighbor_id": 158398,
+        "prob": 0.857398509979248
+      }
+    ],
+    "plot_path": "/kaggle/working/elliptic-gnn-baselines/elliptic-gnn-baseline/reports/plots/m8_graphsage_saliency_node158398.png"
+  },
+  {
+    "node_id": 169450,
+    "label": 1,
+    "top_features": [
+      {
+        "feature": "Local_feature_90",
+        "importance": 0.1082330197095871
+      },
+      {
+        "feature": "Local_feature_3",
+        "importance": 0.06494767218828201
+      },
+      {
+        "feature": "Local_feature_53",
+        "importance": 0.06192182004451752
+      },
+      {
+        "feature": "Local_feature_55",
+        "importance": 0.0456748865544796
+      },
+      {
+        "feature": "Local_feature_89",
+        "importance": 0.04398755729198456
+      },
+      {
+        "feature": "Local_feature_88",
+        "importance": 0.030046025291085243
+      },
+      {
+        "feature": "Local_feature_52",
+        "importance": 0.028299931436777115
+      },
+      {
+        "feature": "Local_feature_91",
+        "importance": 0.028065402060747147
+      },
+      {
+        "feature": "Local_feature_54",
+        "importance": 0.02746913582086563
+      },
+      {
+        "feature": "Local_feature_83",
+        "importance": 0.02075856551527977
+      }
+    ],
+    "top_neighbors": [
+      {
+        "neighbor_id": 169450,
+        "prob": 0.833418071269989
+      }
+    ],
+    "plot_path": "/kaggle/working/elliptic-gnn-baselines/elliptic-gnn-baseline/reports/plots/m8_graphsage_saliency_node169450.png"
+  }
+]
