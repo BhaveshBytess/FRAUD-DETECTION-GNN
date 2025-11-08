@@ -57,7 +57,10 @@ Fraud detection on cryptocurrency transaction networks is a critical application
 | GraphSAGE | Local-only (AF1–93) | **0.556** | **+24%** | **GNN unlocked!** |
 
 ![Model Performance Comparison](reports/plots/all_models_comparison.png)
+
 *Figure 1: PR-AUC comparison across all models. XGBoost dominates on full features; GraphSAGE improves significantly when aggregate features removed.*
+
+> **Note:** If images don't appear, view them directly at [`reports/plots/all_models_comparison.png`](reports/plots/all_models_comparison.png)
 
 ---
 
@@ -498,7 +501,10 @@ See [`docs/M7_RESULTS.md`](docs/M7_RESULTS.md) for complete analysis.
 **Finding:** XGBoost heavily relies on aggregate features (AF94+) alongside local features.
 
 ![SHAP Summary](reports/plots/m8_xgb_shap_summary.png)
+
 *Figure 2: SHAP feature importance for XGBoost. Aggregate features prominently used.*
+
+> **Note:** If image doesn't appear, view it directly at [`reports/plots/m8_xgb_shap_summary.png`](reports/plots/m8_xgb_shap_summary.png)
 
 **GraphSAGE (Local-Only) — Gradient Saliency:**
 - Computed gradient × input saliency for high-confidence fraud predictions
@@ -510,7 +516,10 @@ See [`docs/M7_RESULTS.md`](docs/M7_RESULTS.md) for complete analysis.
 **Finding:** GraphSAGE (local-only) learns representations from graph structure that complement local features.
 
 ![GraphSAGE Saliency Example](reports/plots/m8_graphsage_saliency_node156892.png)
+
 *Figure 3: GraphSAGE saliency map for a fraud transaction. Model attends to local features and neighborhood patterns.*
+
+> **Note:** If image doesn't appear, view it directly at [`reports/plots/m8_graphsage_saliency_node156892.png`](reports/plots/m8_graphsage_saliency_node156892.png)
 
 **Comparison:**
 - XGBoost uses **pre-computed aggregates** directly
