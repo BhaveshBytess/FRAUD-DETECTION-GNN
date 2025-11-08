@@ -1,66 +1,65 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
+dist/
+build/
 *.egg
 
-# Jupyter
-.ipynb_checkpoints
-*.ipynb_checkpoints
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
 
-# PyTorch
-*.pt
-*.pth
-*.ckpt
-checkpoints/*
-!checkpoints/.gitkeep
-
-# Data (keep structure, ignore files)
-data/elliptic/*.csv
-data/elliptic/*.json
-!data/elliptic/.gitkeep
-
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data (user must download)
+data/Elliptic++*/
+data/*.csv
+data/*.parquet
+
+# Checkpoints (optional - can track best models)
+# checkpoints/*.pt
+
+# Reports (track summaries, not large files)
+reports/*.pkl
+reports/*.joblib
+reports/plots/*.pdf
+
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Reports (keep structure)
-reports/*.json
-reports/*.csv
-reports/plots/*.png
-reports/plots/*.jpg
-!reports/.gitkeep
-!reports/plots/.gitkeep
-
-# Virtual environments
-venv/
-env/
-ENV/
-.venv/
+# Archives and backups
+archive/
+*.bak
+*_OLD.*
+*_backup.*
 
 # Logs
 *.log
-Elliptic++ Dataset/
+logs/
+
+# Temporary
+tmp/
+temp/
+*.tmp

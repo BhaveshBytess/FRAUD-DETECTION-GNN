@@ -1,0 +1,5 @@
+{
+  "model_path": "C:\\Users\\oumme\\OneDrive\\Desktop\\FRAUD-DETECTION-GNN\\reports\\models\\xgb_full.json",
+  "shap_csv": "C:\\Users\\oumme\\OneDrive\\Desktop\\FRAUD-DETECTION-GNN\\reports\\m8_xgb_shap_importance.csv",
+  "plot_path": "C:\\Users\\oumme\\OneDrive\\Desktop\\FRAUD-DETECTION-GNN\\reports\\plots\\m8_xgb_shap_summary.png"
+}
