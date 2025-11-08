@@ -2,16 +2,21 @@
 ## Revisiting Graph Learning on the Elliptic++ Bitcoin Fraud Detection Dataset
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release](https://img.shields.io/github/v/release/BhaveshBytess/FRAUD-DETECTION-GNN)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN/releases)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![PyG](https://img.shields.io/badge/PyTorch_Geometric-2.3+-3C2179.svg)](https://pytorch-geometric.readthedocs.io/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-F7931E.svg)](https://scikit-learn.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-2.0+-blue.svg)](https://xgboost.readthedocs.io/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/yourusername/elliptic-gnn-baselines/graphs/commit-activity)
+[![GitHub stars](https://img.shields.io/github/stars/BhaveshBytess/FRAUD-DETECTION-GNN?style=social)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/BhaveshBytess/FRAUD-DETECTION-GNN?style=social)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/BhaveshBytess/FRAUD-DETECTION-GNN)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/BhaveshBytess/FRAUD-DETECTION-GNN)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN/commits/main)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN/graphs/commit-activity)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![arXiv](https://img.shields.io/badge/arXiv-2501.xxxxx-b31b1b.svg)](https://arxiv.org/)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.xxxxxx-blue.svg)](https://zenodo.org/)
 [![Documentation](https://img.shields.io/badge/docs-passing-brightgreen.svg)](./docs/)
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fyourusername%2Felliptic-gnn-baselines&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visits&edge_flat=false)](https://hits.seeyoufarm.com)
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FBhaveshBytess%2FFRAUD-DETECTION-GNN&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visits&edge_flat=false)](https://hits.seeyoufarm.com)
 
 ---
 
