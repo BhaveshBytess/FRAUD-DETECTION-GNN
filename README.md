@@ -161,7 +161,7 @@ FRAUD-DETECTION-GNN/
 | Document | Description |
 |----------|-------------|
 | 📘 [**Full Documentation**](docs/README_FULL.md) | Complete technical README (~10 min read) |
-| 📄 [**Project Report**](PROJECT_REPORT.md) | Analysis, discussion, and findings |
+| 📄 [**Project Report**](docs/PROJECT_REPORT.md) | Analysis, discussion, and findings |
 | 🔬 [**Feature Ablation**](docs/M7_RESULTS.md) | Why AF94–AF182 explain the GNN gap |
 | 🧠 [**Interpretability**](docs/M8_INTERPRETABILITY.md) | SHAP (XGBoost) + saliency (GraphSAGE) |
 | ⏱️ [**Temporal Study**](docs/M9_TEMPORAL.md) | Generalization across time windows |
