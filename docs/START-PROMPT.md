@@ -3,7 +3,7 @@
 **Context load:**
 You are now initializing work on the repository **`elliptic-gnn-baselines`**, a reproducible research-grade portfolio project analyzing the **relative strengths of GNNs and ML models** on the **Elliptic++ fraud detection dataset.**
 
-This project has completed all analytic milestones through **M9** and is now in the *final wrap-up* phase.
+This project has **COMPLETED** all milestones through **M10** and is now in **production-ready** state with published Zenodo DOI.
 
 Your full operational context is defined by three documents:
 
@@ -22,11 +22,11 @@ Your full operational context is defined by three documents:
    * `PROJECT_SPEC.md` as the **immutable technical blueprint**.
    * `TASKS.md` as the **dynamic planner** (update statuses `[ ]`, `[~]`, `[x]`, `[?]`).
 4. Confirm dataset path `data/Elliptic++ Dataset/` exists and contains **real Elliptic++ data only** — no synthetic substitutes.
-5. Resume from **M10 (final polish)** per current progress.
+5. Project is **COMPLETE** - use for reference, extensions, or new experiments only.
 
 ---
 
-## 📈 Current State Snapshot (as of M6)
+## 📈 Current State Snapshot (as of Nov 8, 2025)
 
 | Milestone | Status | Summary                                                                      |
 | :-------- | :----- | :--------------------------------------------------------------------------- |
@@ -36,10 +36,10 @@ Your full operational context is defined by three documents:
 | **M4**    | ✅      | GraphSAGE (PR-AUC: 0.448) & GAT (PR-AUC: 0.184) trained and logged           |
 | **M5**    | ✅      | Tabular baselines (XGBoost: 0.669, RF: 0.658, MLP: 0.364) completed          |
 | **M6**    | ✅      | Final polish, documentation corrected, comparative analysis complete          |
-| **M7**    | ✅      | Causality & Feature Dominance (ablation + correlations logged)               |
-| **M8**    | ✅      | Interpretability (SHAP + GraphSAGE saliency)                                 |
-| **M9**    | ✅      | Temporal robustness (multiple time windows)                                 |
-| **M10**   | ⏳      | Final project wrap                                                            |
+| **M7**    | ✅      | Causality & Feature Dominance - **EXECUTED** (ablation + correlations)      |
+| **M8**    | ✅      | Interpretability - **EXECUTED** (SHAP + GraphSAGE saliency)                 |
+| **M9**    | ✅      | Temporal robustness - **EXECUTED** (multiple time windows tested)           |
+| **M10**   | ✅      | Final project wrap - **COMPLETE** (docs polished, Zenodo published)         |
 
 ---
 
@@ -63,10 +63,12 @@ Your mission is to **quantify the marginal benefit of graph information** under 
 - Why GNNs don't add value → Double-encoding graph structure
 - When GNNs would help → Raw features without pre-aggregation
 
-**M7 Experiment (Documented, not implemented):**
-- Remove AF94–AF182, retrain both model types
-- Expected: GNNs improve (learn from graph), XGBoost drops (loses signals)
-- See `docs/M7_CAUSALITY_EXPERIMENT.md` for full experimental design
+**M7 Experiment (✅ EXECUTED - Nov 8, 2025):**
+- ✅ Removed AF94–AF182, retrained both XGBoost and GraphSAGE
+- ✅ **CONFIRMED:** GraphSAGE improved by 24% (0.448 → 0.556)
+- ✅ **CONFIRMED:** XGBoost dropped only 3% (0.669 → 0.649)
+- 📊 Results: `reports/m7_tabular_ablation.csv`, `reports/m7_graphsage_ablation_summary.csv`
+- 📄 Full analysis: `docs/M7_RESULTS.md`, `docs/M7_CAUSALITY_EXPERIMENT.md`
 
 ---
 
@@ -87,11 +89,10 @@ Escalate any unresolved issue after 5 fix attempts with a concise failure summar
 
 | Milestone                                  | Goal                                                                                                                     | Deliverables                                                                                            |
 | :----------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
-| **M7 — Causality & Feature Dominance** ✅ | Confirmed AF94–AF182 double-encode neighbor stats (see `docs/M7_CAUSALITY_EXPERIMENT.md`, `docs/M7_RESULTS.md`). | Artifacts: `reports/m7_tabular_ablation.csv`, `reports/m7_graphsage_ablation_summary.csv`, `reports/m7_corr_*.csv` |
-| **M8 — Interpretability & Analysis** ✅     | SHAP (XGBoost full) + GraphSAGE saliency (local-only) explain *why* models differ.                                        | `notebooks/07_interpretability.ipynb`, `reports/m8_xgb_shap_importance.csv`, `reports/m8_graphsage_saliency.json`, `docs/M8_INTERPRETABILITY.md` |
-| **M9 — Temporal Robustness Study** ✅        | Measured stability under earlier train windows.                                                                          | `notebooks/08_temporal_shift.ipynb`, `reports/m9_temporal_results.csv`, `docs/M9_TEMPORAL.md`            |
-| **M10 — Final Project Wrap** ⏳              | README polish, summary updates, repo cleanup.                                                                           | `README.md`, `PROJECT_SUMMARY.md`, final release checklist                                             |
-| **M10 — Final Project Wrap**               | Documentation polish, comparative report, publication-ready summary.                                                     | `README.md` (final), `PROJECT_SUMMARY.md`, cleaned repo                                                 |
+| **M7 — Causality & Feature Dominance** ✅ | **EXECUTED & CONFIRMED** - AF94–AF182 double-encode neighbor stats. GraphSAGE +24% when removed. | `reports/m7_tabular_ablation.csv`, `reports/m7_graphsage_ablation_summary.csv`, `docs/M7_RESULTS.md` |
+| **M8 — Interpretability & Analysis** ✅     | **EXECUTED** - SHAP (XGBoost) + gradient saliency (GraphSAGE) identify key features.             | `reports/m8_xgb_shap_importance.csv`, `reports/m8_graphsage_saliency.json`, `docs/M8_INTERPRETABILITY.md` |
+| **M9 — Temporal Robustness Study** ✅        | **EXECUTED** - XGBoost stable across time; GraphSAGE benefits from earlier training windows.     | `notebooks/08_temporal_shift.ipynb`, `reports/m9_temporal_results.csv`, `docs/M9_TEMPORAL.md` |
+| **M10 — Final Project Wrap** ✅              | **COMPLETE** - Documentation polished, Zenodo DOI published, repo production-ready.              | `README.md`, `CITATION.cff`, `PROJECT_REPORT.md`, DOI: 10.5281/zenodo.17560930 |
 
 ---
 
@@ -118,20 +119,23 @@ Escalate any unresolved issue after 5 fix attempts with a concise failure summar
 
 1. Read and summarize `PROJECT_SPEC.md` and `TASKS.md` to confirm context.
 2. Review current project state:
-   * Milestones M1-M9: ✅ **Complete**
-   * M10: ⏳ **Pending** (final polish)
-3. Identify next priority from `TASKS.md` (M10 items).
-4. Follow **Plan → Verify → Execute → Log** for the selected task.
-5. Confirm dataset accessibility and prior metrics before executing new experiments.
+   * **All Milestones M1-M10: ✅ COMPLETE**
+   * **Zenodo DOI: 10.5281/zenodo.17560930** ✅ Published
+   * **Repository: Production-ready** ✅
+3. For new work: Define new milestones beyond M10 or extensions.
+4. For maintenance: Update documentation, fix bugs, or add features.
+5. Dataset location: `data/Elliptic++ Dataset/` (download from Google Drive link in README).
 
 ---
 
-### 🪩 Output Expectation for the First Run
+### 🪩 Output Expectation for New Sessions
 
-* Summarized understanding of the project (scope + data + current state).
-* Verified dataset and environment readiness.
-* Identified current focus: M10 (final wrap tasks).
-* Plan for remaining documentation/cleanup objectives.
+* Summarized understanding of the **completed** project (scope + data + findings).
+* Confirmation that all milestones (M1-M10) are complete.
+* Recognition that M7-M9 experiments were **executed** (not just documented).
+* Understanding of the key finding: Feature dominance hypothesis **confirmed**.
+* Awareness of Zenodo publication (DOI: 10.5281/zenodo.17560930).
+* Ready to support: extensions, maintenance, or new research directions.
 
 ---
 
@@ -156,6 +160,29 @@ Escalate any unresolved issue after 5 fix attempts with a concise failure summar
 
 ---
 
-**End of Start Prompt (Updated 2025-11-07)**
+---
+
+## 🏆 **Project Status: COMPLETE**
+
+**Final Deliverables:**
+- ✅ All models trained and evaluated (M1-M5)
+- ✅ Feature dominance hypothesis **CONFIRMED** via ablation (M7)
+- ✅ Interpretability analysis **EXECUTED** (M8)
+- ✅ Temporal robustness **TESTED** (M9)
+- ✅ Documentation **POLISHED** (M10)
+- ✅ Zenodo DOI **PUBLISHED**: [10.5281/zenodo.17560930](https://doi.org/10.5281/zenodo.17560930)
+- ✅ Repository **PRODUCTION-READY**
+
+**Key Contributions:**
+1. Demonstrated that pre-computed neighbor aggregates (AF94–AF182) make GNNs redundant
+2. Showed GraphSAGE improves 24% when aggregate features are removed
+3. Provided reproducible baselines for Elliptic++ fraud detection
+4. Published findings with full artifact preservation
+
+**Contact:** 10bhavesh7.11@gmail.com
+
+---
+
+**End of Start Prompt (Updated 2025-11-08 — Final Version)**
 
 ---

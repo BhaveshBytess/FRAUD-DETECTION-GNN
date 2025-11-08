@@ -33,19 +33,22 @@ Define the **what** of this project: scope, dataset, metrics, artifacts, repo sc
 ## 2) Dataset (Elliptic++)
 
 **Identity:** Elliptic++ Bitcoin transaction graph (nodes = transactions; edges = directed flows).
-**Location:** `data/elliptic/` (local only; user provides files).
+**Location:** `data/Elliptic++ Dataset/` (local only; user provides files).
+**Download:** https://drive.google.com/drive/folders/1MRPXz79Lu_JGLlJ21MDfML44dKN9R08l
 **Required files**
 
-* `nodes.csv` — columns:
+* `txs_features.csv` — columns:
 
-  * `tx_id` (int/str unique),
-  * `timestamp` (int step or ISO datetime),
-  * `y` (int: 1=fraud, 0=legit, -1=unlabeled),
-  * `feat_*` feature columns (float/int).
-* `edges.csv` — columns:
+  * `txid` (int/str unique),
+  * Timestep column (int),
+  * `Local_feature_1` to `Local_feature_93`, `Aggregate_feature_1` to `Aggregate_feature_89`, and additional features (total 182 features).
+* `txs_classes.csv` — columns:
 
-  * `src_tx_id`, `dst_tx_id`,
-  * optional `weight`.
+  * `txid`,
+  * `class` (int: 1=fraud/illicit, 2=licit/legit, 3=unknown/unlabeled).
+* `txs_edgelist.csv` — columns:
+
+  * `txId1`, `txId2` (directed edges).
 
 **Data policy**
 
@@ -69,7 +72,7 @@ We mimic deployment by ensuring **no future information** contaminates training.
    * **Val:** `t_train_end < timestamp ≤ t_val_end`
    * **Test:** `timestamp > t_val_end`
 4. For each split’s graph, include **only edges whose both endpoints** fall in that split.
-5. Save `data/elliptic/splits.json` with counts and boundaries.
+5. Save `data/Elliptic++ Dataset/splits.json` with counts and boundaries.
 
 ---
 

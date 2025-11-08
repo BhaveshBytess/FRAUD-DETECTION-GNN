@@ -2,9 +2,13 @@
 
 ## 🎯 Project Context
 
-**Project:** `elliptic-gnn-baselines`
+**Project:** `elliptic-gnn-baselines` (FRAUD-DETECTION-GNN)
+**Status:** ✅ **COMPLETE** (All milestones M1-M10 finished, Zenodo published)
 **Goal:** Build, train, and evaluate clean baseline Graph Neural Networks (GCN, GraphSAGE, GAT) on the **Elliptic++** dataset.
 **Purpose:** Demonstration & portfolio project for résumé / GitHub — clarity, reproducibility, and presentation over raw research.
+**Published:** DOI [10.5281/zenodo.17560930](https://doi.org/10.5281/zenodo.17560930)
+
+**Key Finding:** Pre-computed neighbor aggregates (AF94–AF182) make GNNs redundant; removing them causes GraphSAGE to improve 24%.
 
 ---
 
@@ -136,14 +140,16 @@ The agent must never assume. It must reason and confirm.
 
 **Data Policy:**
 
-* 📁 Data lives in `data/elliptic/` with:
+* 📁 Data lives in `data/Elliptic++ Dataset/` with:
 
-  * `nodes.csv` — transaction features & labels.
-  * `edges.csv` — graph connections.
+  * `txs_features.csv` — transaction features (182 per transaction).
+  * `txs_classes.csv` — labels (Class 1=Fraud, Class 2=Legit, Class 3=Unknown).
+  * `txs_edgelist.csv` — graph connections.
 * 🛑 Never fabricate or sample fake data.
 * 🧾 Always verify the existence of these files before import:
 
   * if missing, stop and request user confirmation for correct path.
+* 📥 **Download location:** https://drive.google.com/drive/folders/1MRPXz79Lu_JGLlJ21MDfML44dKN9R08l
 * 💾 All metrics, plots, and outputs must reference the real dataset version in use.
 
 ---
