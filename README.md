@@ -2,6 +2,7 @@
 ## Revisiting Graph Learning on the Elliptic++ Bitcoin Fraud Detection Dataset
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17560930.svg)](https://doi.org/10.5281/zenodo.17560930)
 [![GitHub release](https://img.shields.io/github/v/release/BhaveshBytess/FRAUD-DETECTION-GNN)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN/releases)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
@@ -202,6 +203,7 @@ If you use this code or findings, please cite:
   title = {When Graph Neural Networks Fail: Revisiting Graph Learning on the Elliptic++ Dataset},
   author = {Bytes, Bhavesh},
   year = {2025},
+  doi = {10.5281/zenodo.17560930},
   url = {https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN},
   license = {MIT}
 }

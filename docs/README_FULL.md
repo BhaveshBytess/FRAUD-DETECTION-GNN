@@ -4,7 +4,7 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-complete-success)
-[![DOI](https://img.shields.io/badge/DOI-Pending-blue)](https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17560930.svg)](https://doi.org/10.5281/zenodo.17560930)
 
 **TL;DR:** XGBoost (tabular) outperforms standard GNN (Graph Neural Network) baselines (GraphSAGE, GCN, GAT) on Elliptic++ for fraud detection (PR-AUC: XGBoost=0.669 vs GraphSAGE=0.448); feature ablation experiments reveal that precomputed aggregate features (AF94–AF182) make GNNs redundant unless removed, improving GraphSAGE by 24% when using local-only features.
 
@@ -127,7 +127,7 @@ data/
 ```
 Weber, M., Domeniconi, G., Chen, J., Weidele, D. K. I., Bellei, C., Robinson, T., & Leiserson, C. E. (2019).
 Anti-Money Laundering in Bitcoin: Experimenting with Graph Convolutional Networks for Financial Forensics.
-arXiv preprint arXiv:1908.02591.
+KDD Workshop on Anomaly Detection in Finance, 2019.
 ```
 
 **Licensing:** The Elliptic++ dataset is provided for research purposes. See the original paper (Weber et al., 2019) for citation requirements.
@@ -657,25 +657,26 @@ If you use this code or findings in your research, please cite:
 
 **BibTeX:**
 ```bibtex
-@misc{elliptic-gnn-2025,
+@software{elliptic-gnn-2025,
   title={When Graph Neural Networks Fail: Revisiting Graph Learning on the Elliptic++ Dataset},
   author={Bhavesh Bytes},
   year={2025},
+  doi={10.5281/zenodo.17560930},
   url={https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN},
-  note={v1.0.0}
+  version={1.0.0}
 }
 ```
 
 **APA:**
 ```
 Bytes, B. (2025). When Graph Neural Networks Fail: Revisiting Graph Learning on the Elliptic++ Dataset 
-[Computer software]. https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN
+(Version 1.0.0) [Computer software]. https://doi.org/10.5281/zenodo.17560930
 ```
 
 **IEEE:**
 ```
 B. Bytes, "When Graph Neural Networks Fail: Revisiting Graph Learning on the Elliptic++ Dataset," 2025. 
-[Online]. Available: https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN
+[Online]. Available: https://doi.org/10.5281/zenodo.17560930
 ```
 
 ### Dataset Citation
@@ -683,10 +684,10 @@ B. Bytes, "When Graph Neural Networks Fail: Revisiting Graph Learning on the Ell
 Please also cite the original Elliptic++ dataset:
 
 ```bibtex
-@article{weber2019anti,
+@inproceedings{weber2019anti,
   title={Anti-Money Laundering in Bitcoin: Experimenting with Graph Convolutional Networks for Financial Forensics},
   author={Weber, Mark and Domeniconi, Giacomo and Chen, Jie and Weidele, Daniel Karl I and Bellei, Claudio and Robinson, Tom and Leiserson, Charles E},
-  journal={arXiv preprint arXiv:1908.02591},
+  booktitle={KDD Workshop on Anomaly Detection in Finance},
   year={2019}
 }
 ```

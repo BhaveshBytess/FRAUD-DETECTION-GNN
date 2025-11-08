@@ -4,6 +4,7 @@ type: software
 title: "When Graph Neural Networks Fail: Revisiting Graph Learning on the Elliptic++ Dataset"
 version: 1.0.0
 date-released: 2025-11-08
+doi: 10.5281/zenodo.17560930
 url: "https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN"
 repository-code: "https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN"
 license: MIT
