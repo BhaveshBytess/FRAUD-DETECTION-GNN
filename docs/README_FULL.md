@@ -35,15 +35,15 @@ Fraud detection on cryptocurrency transaction networks is a critical application
 
 ### Performance Comparison (Full Features)
 
-| Rank | Model | Type | PR-AUC | ROC-AUC | F1 Score | Recall@1% | Training Time |
-|------|-------|------|--------|---------|----------|-----------|---------------|
-| 🥇 1 | **XGBoost** | Tabular | **0.669** | 0.888 | 0.699 | 0.175 | ~2 min (CPU) |
-| 🥈 2 | Random Forest | Tabular | 0.658 | 0.877 | 0.694 | 0.175 | ~20 sec (CPU) |
-| 🥉 3 | **GraphSAGE** | GNN | 0.448 | 0.821 | 0.453 | 0.148 | ~15 min (GPU) |
-| 4 | MLP | Tabular | 0.364 | 0.830 | 0.486 | 0.094 | ~1 min (CPU) |
-| 5 | GCN | GNN | 0.198 | 0.763 | 0.249 | 0.061 | ~15 min (GPU) |
-| 6 | GAT | GNN | 0.184 | 0.794 | 0.290 | 0.013 | ~15 min (GPU) |
-| 7 | Logistic Regression | Tabular | 0.164 | 0.824 | 0.256 | 0.005 | ~5 sec (CPU) |
+| Rank | Model | Type | PR-AUC | ROC-AUC | F1 Score | Recall@1% |
+|------|-------|------|--------|---------|----------|-----------|
+| 🥇 1 | **XGBoost** | Tabular | **0.669** | 0.888 | 0.699 | 0.175 |
+| 🥈 2 | Random Forest | Tabular | 0.658 | 0.877 | 0.694 | 0.175 |
+| 🥉 3 | **GraphSAGE** | GNN | 0.448 | 0.821 | 0.453 | 0.148 |
+| 4 | MLP | Tabular | 0.364 | 0.830 | 0.486 | 0.094 |
+| 5 | GCN | GNN | 0.198 | 0.763 | 0.249 | 0.061 |
+| 6 | GAT | GNN | 0.184 | 0.794 | 0.290 | 0.013 |
+| 7 | Logistic Regression | Tabular | 0.164 | 0.824 | 0.256 | 0.005 |
 
 **Performance Gap:** XGBoost achieves **49% better PR-AUC** than the best GNN (GraphSAGE).
 
@@ -56,11 +56,11 @@ Fraud detection on cryptocurrency transaction networks is a critical application
 | GraphSAGE | Full (AF1–182) | 0.448 | — | Redundant encoding |
 | GraphSAGE | Local-only (AF1–93) | **0.556** | **+24%** | **GNN unlocked!** |
 
-![Model Performance Comparison](reports/plots/all_models_comparison.png)
+![Model Performance Comparison](../reports/plots/all_models_comparison.png)
 
 *Figure 1: PR-AUC comparison across all models. XGBoost dominates on full features; GraphSAGE improves significantly when aggregate features removed.*
 
-> **Note:** If images don't appear, view them directly at [`reports/plots/all_models_comparison.png`](reports/plots/all_models_comparison.png)
+> **Note:** If images don't appear, view them directly at [`../reports/plots/all_models_comparison.png`](../reports/plots/all_models_comparison.png)
 
 ---
 
@@ -264,7 +264,7 @@ python -m src.data.elliptic_loader --root "data/Elliptic++ Dataset" --check
 
 ### Running Baseline Experiments
 
-**1. Tabular Baselines (CPU-friendly, ~10 minutes total)**
+**1. Tabular Baselines (CPU-friendly)**
 
 ```bash
 # Train all tabular models (Logistic Regression, Random Forest, XGBoost, MLP)
@@ -277,7 +277,7 @@ python scripts/run_m5_tabular.py
 # - reports/logistic_regression_metrics.json
 ```
 
-**2. GNN Baselines (GPU recommended, ~15 minutes each)**
+**2. GNN Baselines (GPU recommended)**
 
 ```bash
 # Train GraphSAGE (best GNN)
@@ -358,18 +358,18 @@ cat reports/xgboost_metrics.json
 
 ### Runtime Expectations
 
-| Task | Hardware | Approximate Time |
-|------|----------|------------------|
-| Data validation | CPU | ~30 seconds |
-| XGBoost training | CPU (8 cores) | ~2 minutes |
-| Random Forest training | CPU (8 cores) | ~20 seconds |
-| MLP training | CPU | ~1 minute |
-| GraphSAGE training | GPU (V100) | ~15 minutes |
-| GCN training | GPU (V100) | ~15 minutes |
-| GAT training | GPU (V100) | ~15 minutes |
-| Feature ablation (full suite) | GPU | ~2 hours |
-| SHAP analysis | CPU | ~5 minutes |
-| Temporal robustness | GPU | ~1 hour |
+| Task | Hardware |
+|------|----------|
+| Data validation | CPU |
+| XGBoost training | CPU (8 cores) |
+| Random Forest training | CPU (8 cores) |
+| MLP training | CPU |
+| GraphSAGE training | GPU (V100) |
+| GCN training | GPU (V100) |
+| GAT training | GPU (V100) |
+| Feature ablation (full suite) | GPU |
+| SHAP analysis | CPU |
+| Temporal robustness | GPU |
 
 ---
 
@@ -491,11 +491,11 @@ See [`docs/M7_RESULTS.md`](docs/M7_RESULTS.md) for complete analysis.
 
 **Finding:** XGBoost heavily relies on aggregate features (AF94+) alongside local features.
 
-![SHAP Summary](reports/plots/m8_xgb_shap_summary.png)
+![SHAP Summary](../reports/plots/m8_xgb_shap_summary.png)
 
 *Figure 2: SHAP feature importance for XGBoost. Aggregate features prominently used.*
 
-> **Note:** If image doesn't appear, view it directly at [`reports/plots/m8_xgb_shap_summary.png`](reports/plots/m8_xgb_shap_summary.png)
+> **Note:** If image doesn't appear, view it directly at [`../reports/plots/m8_xgb_shap_summary.png`](../reports/plots/m8_xgb_shap_summary.png)
 
 **GraphSAGE (Local-Only) — Gradient Saliency:**
 - Computed gradient × input saliency for high-confidence fraud predictions
@@ -506,11 +506,11 @@ See [`docs/M7_RESULTS.md`](docs/M7_RESULTS.md) for complete analysis.
 
 **Finding:** GraphSAGE (local-only) learns representations from graph structure that complement local features.
 
-![GraphSAGE Saliency Example](reports/plots/m8_graphsage_saliency_node156892.png)
+![GraphSAGE Saliency Example](../reports/plots/m8_graphsage_saliency_node156892.png)
 
 *Figure 3: GraphSAGE saliency map for a fraud transaction. Model attends to local features and neighborhood patterns.*
 
-> **Note:** If image doesn't appear, view it directly at [`reports/plots/m8_graphsage_saliency_node156892.png`](reports/plots/m8_graphsage_saliency_node156892.png)
+> **Note:** If image doesn't appear, view it directly at [`../reports/plots/m8_graphsage_saliency_node156892.png`](../reports/plots/m8_graphsage_saliency_node156892.png)
 
 **Comparison:**
 - XGBoost uses **pre-computed aggregates** directly
