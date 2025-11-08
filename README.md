@@ -87,7 +87,7 @@ python -m src.data.elliptic_loader --root "data/Elliptic++ Dataset" --check
 python -m src.train --config configs/graphsage.yaml
 
 # Train tabular baselines (CPU, ~2 min)
-python scripts/run_m5_tabular.py --config configs/m5_xgboost.yaml
+python scripts/run_m5_tabular.py
 
 # 5️⃣ View results
 ls reports/  # Metrics JSON/CSV files

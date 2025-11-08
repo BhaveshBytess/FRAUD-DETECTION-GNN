@@ -16,18 +16,17 @@ Fraud detection on cryptocurrency transaction networks is a critical application
 
 ## Quick Links
 
-- **Project Specification:** [`docs/PROJECT_SPEC.md`](docs/PROJECT_SPEC.md) — Complete technical blueprint
+- **Project Specification:** [`PROJECT_SPEC.md`](PROJECT_SPEC.md) — Complete technical blueprint
 - **Full Report:** [`PROJECT_REPORT.md`](PROJECT_REPORT.md) — Publication-style comprehensive analysis
-- **Project Summary:** [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md) — Detailed narrative with evidence
-- **Results & Metrics:** [`reports/`](reports/) — All experiment outputs (JSON, CSV, plots)
-- **Notebooks:** [`notebooks/`](notebooks/) — Reproducible experiments (03–08)
-- **Model Checkpoints:** [`checkpoints/`](checkpoints/) — Trained models (.pt files)
+- **Results & Metrics:** [`../reports/`](../reports/) — All experiment outputs (JSON, CSV, plots)
+- **Notebooks:** [`../notebooks/`](../notebooks/) — Reproducible experiments (03–08)
+- **Model Checkpoints:** [`../checkpoints/`](../checkpoints/) — Trained models (.pt files)
 - **Dataset Instructions:** See [Dataset section](#dataset) below
 
 **Milestone Documentation:**
-- M7 Causality: [`docs/M7_RESULTS.md`](docs/M7_RESULTS.md) — Feature dominance ablation
-- M8 Interpretability: [`docs/M8_INTERPRETABILITY.md`](docs/M8_INTERPRETABILITY.md) — SHAP + GNN saliency
-- M9 Temporal Robustness: [`docs/M9_TEMPORAL.md`](docs/M9_TEMPORAL.md) — Time-shift experiments
+- M7 Causality: [`M7_RESULTS.md`](M7_RESULTS.md) — Feature dominance ablation
+- M8 Interpretability: [`M8_INTERPRETABILITY.md`](M8_INTERPRETABILITY.md) — SHAP + GNN saliency
+- M9 Temporal Robustness: [`M9_TEMPORAL.md`](M9_TEMPORAL.md) — Time-shift experiments
 
 ---
 
@@ -59,8 +58,6 @@ Fraud detection on cryptocurrency transaction networks is a critical application
 ![Model Performance Comparison](../reports/plots/all_models_comparison.png)
 
 *Figure 1: PR-AUC comparison across all models. XGBoost dominates on full features; GraphSAGE improves significantly when aggregate features removed.*
-
-> **Note:** If images don't appear, view them directly at [`../reports/plots/all_models_comparison.png`](../reports/plots/all_models_comparison.png)
 
 ---
 
@@ -404,7 +401,7 @@ cat reports/xgboost_metrics.json
 - Dropout: 0.3
 - Batch size: Full-batch (graph is small enough)
 
-See [`configs/`](configs/) for complete hyperparameter specifications.
+See [`../configs/`](../configs/) for complete hyperparameter specifications.
 
 ### Evaluation Metrics
 
@@ -440,7 +437,7 @@ Critical for realistic evaluation, we enforce strict temporal ordering:
 - Validation: 23,631 nodes (11.6%), fraud rate 11.53%
 - Test: 22,933 nodes (11.3%), fraud rate 5.69%
 
-See [`src/data/elliptic_loader.py`](src/data/elliptic_loader.py) for implementation.
+See [`../src/data/elliptic_loader.py`](../src/data/elliptic_loader.py) for implementation.
 
 ---
 
@@ -474,7 +471,7 @@ We trained models on three feature configurations:
 
 **Conclusion:** The hypothesis is **CONFIRMED**. Graph structure is valuable, but tabular features already captured it through pre-computed aggregations. GNNs only add value when features are raw (local-only).
 
-See [`docs/M7_RESULTS.md`](docs/M7_RESULTS.md) for complete analysis.
+See [`M7_RESULTS.md`](M7_RESULTS.md) for complete analysis.
 
 ### M8: Interpretability Analysis
 
@@ -495,8 +492,6 @@ See [`docs/M7_RESULTS.md`](docs/M7_RESULTS.md) for complete analysis.
 
 *Figure 2: SHAP feature importance for XGBoost. Aggregate features prominently used.*
 
-> **Note:** If image doesn't appear, view it directly at [`../reports/plots/m8_xgb_shap_summary.png`](../reports/plots/m8_xgb_shap_summary.png)
-
 **GraphSAGE (Local-Only) — Gradient Saliency:**
 - Computed gradient × input saliency for high-confidence fraud predictions
 - **Focus areas:**
@@ -510,14 +505,12 @@ See [`docs/M7_RESULTS.md`](docs/M7_RESULTS.md) for complete analysis.
 
 *Figure 3: GraphSAGE saliency map for a fraud transaction. Model attends to local features and neighborhood patterns.*
 
-> **Note:** If image doesn't appear, view it directly at [`../reports/plots/m8_graphsage_saliency_node156892.png`](../reports/plots/m8_graphsage_saliency_node156892.png)
-
 **Comparison:**
 - XGBoost uses **pre-computed aggregates** directly
 - GraphSAGE learns **dynamic aggregations** through message passing
 - Both effective, but XGBoost is faster and simpler when aggregates are available
 
-See [`docs/M8_INTERPRETABILITY.md`](docs/M8_INTERPRETABILITY.md) for full analysis and additional saliency maps.
+See [`M8_INTERPRETABILITY.md`](M8_INTERPRETABILITY.md) for full analysis and additional saliency maps.
 
 ---
 
@@ -552,7 +545,7 @@ We trained models on three temporal configurations:
 
 **Hypothesis:** Earlier training windows may contain cleaner patterns before fraud tactics evolved, or the temporal gap allows models to learn more generalizable representations.
 
-See [`docs/M9_TEMPORAL.md`](docs/M9_TEMPORAL.md) for complete analysis and [`reports/m9_temporal_results.csv`](reports/m9_temporal_results.csv) for raw results.
+See [`M9_TEMPORAL.md`](M9_TEMPORAL.md) for complete analysis and [`../reports/m9_temporal_results.csv`](../reports/m9_temporal_results.csv) for raw results.
 
 ---
 
@@ -634,7 +627,7 @@ Feature ablation experiments:
 
 ### License
 
-This project is licensed under the **MIT License** — see the [`LICENSE`](LICENSE) file for details.
+This project is licensed under the **MIT License** — see the [`../LICENSE`](../LICENSE) file for details.
 
 ```
 MIT License
@@ -694,7 +687,7 @@ Please also cite the original Elliptic++ dataset:
 
 ### Citation File (`CITATION.cff`)
 
-Machine-readable citation metadata is available in [`CITATION.cff`](CITATION.cff).
+Machine-readable citation metadata is available in [`../CITATION.cff`](../CITATION.cff).
 
 ---
 
@@ -886,8 +879,6 @@ This README was created following best practices from:
 ---
 
 ## Version History
-
-See [`RELEASE_NOTES.md`](RELEASE_NOTES.md) for detailed version history.
 
 **v1.0.0 (2025-11-08):** Initial release
 - Complete baseline comparison (7 models)
