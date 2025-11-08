@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "When Graph Neural Networks Fail: Revisiting Graph Learning on the Elliptic++ Dataset"
+version: 1.0.0
+date-released: 2025-11-08
+url: "https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN"
+repository-code: "https://github.com/BhaveshBytess/FRAUD-DETECTION-GNN"
+license: MIT
+authors:
+  - family-names: "Bytes"
+    given-names: "Bhavesh"
+    alias: "BhaveshBytess"
+keywords:
+  - "fraud detection"
+  - "graph neural networks"
+  - "machine learning"
+  - "bitcoin"
+  - "cryptocurrency"
+  - "temporal graphs"
+  - "xgboost"
+  - "graphsage"
+  - "feature engineering"
+abstract: >-
+  This project investigates when Graph Neural Networks (GNNs) 
+  provide marginal value over tabular machine learning models 
+  for fraud detection on the Elliptic++ Bitcoin transaction 
+  dataset. Through ablation experiments, we confirm that 
+  features AF94–AF182 pre-encode neighbor-aggregated information, 
+  making GNNs redundant unless removed. When aggregate features 
+  are removed, GraphSAGE improves by 24%, while XGBoost drops 
+  only 3%. Key finding: Graph structure is valuable, but tabular 
+  features already captured it through pre-computed aggregations.
